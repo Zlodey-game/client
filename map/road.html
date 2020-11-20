@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>map</title>
+
+    <script type="application/javascript">
+        function draw() {
+            const width = 1280;
+            const height = 720;
+            var canvas = document.getElementById("canvas");
+            if (canvas.getContext) {
+                var ctx = canvas.getContext("2d");
+                
+                //road
+                ctx.fillStyle = "rgb(56, 56, 56)";  
+                ctx.fillRect (0, 0, width, height);
+                
+                // 연석
+                ctx.fillStyle = "rgb(206, 206, 206)";
+                // Left
+                ctx.beginPath();
+                ctx.moveTo(0,0);
+                ctx.lineTo(width*0.065,0);
+                ctx.lineTo(0,height*0.7);
+                ctx.closePath();
+                ctx.fill();
+                // Right
+                ctx.beginPath();
+                ctx.moveTo(width,0);
+                ctx.lineTo(width - width*0.065,0);
+                ctx.lineTo(width,height*0.7);
+                ctx.closePath();
+                ctx.fill();
+
+                // 보도
+                ctx.fillStyle = "rgb(244, 177, 131)";
+                // Left
+                ctx.beginPath();
+                ctx.moveTo(0,0);
+                ctx.lineTo(width*0.04,0);
+                ctx.lineTo(0,height*0.4);
+                ctx.closePath();
+                ctx.fill();
+                // Right
+                ctx.beginPath();
+                ctx.moveTo(width,0);
+                ctx.lineTo(width - width*0.04,0);
+                ctx.lineTo(width,height*0.4);
+                ctx.closePath();
+                ctx.fill();
+
+                // 중앙선
+                ctx.fillStyle = "rgb(255, 192, 0)";  
+                ctx.fillRect (width * 0.485, 0, width*0.014, height);
+                ctx.fillRect (width * 0.515, 0, width*0.014, height);
+
+                // 차선
+                ctx.fillStyle = "rgb(255, 255, 255)";  
+                ctx.fillRect (width * 0.485, 0, width*0.014, height);
+                ctx.fillRect (width * 0.515, 0, width*0.014, height);
+
+                //ctx.fillStyle = "rgba(0, 0, 200, 0.5)";
+                //ctx.fillRect (30, 30, 50, 50);
+
+                // 16.51 6.53
+                // 29.35 1.09
+          }
+        }
+      </script>
+</head>
+<body onload="draw();">
+    <canvas id="canvas" width="1280" height="720">
+    </canvas>
+</body>
+</html>
