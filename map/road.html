@@ -5,73 +5,198 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>map</title>
 
-    <script type="application/javascript">
-        function draw() {
-            const width = 1280;
-            const height = 720;
-            var canvas = document.getElementById("canvas");
-            if (canvas.getContext) {
-                var ctx = canvas.getContext("2d");
-                
-                //road
-                ctx.fillStyle = "rgb(56, 56, 56)";  
-                ctx.fillRect (0, 0, width, height);
-                
-                // 연석
-                ctx.fillStyle = "rgb(206, 206, 206)";
-                // Left
-                ctx.beginPath();
-                ctx.moveTo(0,0);
-                ctx.lineTo(width*0.065,0);
-                ctx.lineTo(0,height*0.7);
-                ctx.closePath();
-                ctx.fill();
-                // Right
-                ctx.beginPath();
-                ctx.moveTo(width,0);
-                ctx.lineTo(width - width*0.065,0);
-                ctx.lineTo(width,height*0.7);
-                ctx.closePath();
-                ctx.fill();
-
-                // 보도
-                ctx.fillStyle = "rgb(244, 177, 131)";
-                // Left
-                ctx.beginPath();
-                ctx.moveTo(0,0);
-                ctx.lineTo(width*0.04,0);
-                ctx.lineTo(0,height*0.4);
-                ctx.closePath();
-                ctx.fill();
-                // Right
-                ctx.beginPath();
-                ctx.moveTo(width,0);
-                ctx.lineTo(width - width*0.04,0);
-                ctx.lineTo(width,height*0.4);
-                ctx.closePath();
-                ctx.fill();
-
-                // 중앙선
-                ctx.fillStyle = "rgb(255, 192, 0)";  
-                ctx.fillRect (width * 0.485, 0, width*0.014, height);
-                ctx.fillRect (width * 0.515, 0, width*0.014, height);
-
-                // 차선
-                ctx.fillStyle = "rgb(255, 255, 255)";  
-                ctx.fillRect (width * 0.485, 0, width*0.014, height);
-                ctx.fillRect (width * 0.515, 0, width*0.014, height);
-
-                //ctx.fillStyle = "rgba(0, 0, 200, 0.5)";
-                //ctx.fillRect (30, 30, 50, 50);
-
-                // 16.51 6.53
-                // 29.35 1.09
-          }
-        }
-      </script>
+    
 </head>
-<body onload="draw();">
+<!-- <body onload="draw();"> -->
+<body>
+    <!-- <script>draw();</script> -->
     <canvas id="canvas" width="1280" height="720">
     </canvas>
 </body>
+    <script type="application/javascript">
+        var canvas;
+        var canvasCtx;
+
+        var canvasBuffer;
+        var bufferCtx;
+
+        var playerUnit = {}; //Player Unit Property
+        var threadSpeed = 10;     //Gap of Thread
+        var keyPressOn = {};//pressed - true
+        var character;
+        var asphalt;
+        var gameLoopThread;  //animation Thread ID
+
+        window.addEventListener("load", init, false);
+
+        function init(){
+            canvas = document.getElementById("canvas");
+            canvasCtx = canvas.getContext("2d");
+            canvasBuffer= document.createElement("canvas");
+            canvasBuffer.width = canvas.width;
+            canvasBuffer.height = canvas.height;
+            bufferCtx = canvasBuffer.getContext("2d");
+
+            playerUnit = {
+                x: canvas.width / 2 - 18,
+                y: canvas.height / 2 - 18,
+                width: 120,
+                height: 160,
+                speed: 7
+            }; //UserUnit Property
+
+            ghostUnit = {
+                x: canvas.width / 2 - 18,
+                y: canvas.height / 2 - 18,
+                width: 120,
+                height: 120,
+                speed: 7
+            }; //UserUnit Property
+
+            document.addEventListener("keydown", getKeyDown, false);
+            document.addEventListener("keyup", getKeyUp, false);
+            setImage();
+
+            gameLoopThread = setInterval(gameLoop, threadSpeed);
+        }
+
+        function setImage(){
+            character = new Image();
+            character.src = "char.png";
+
+            ghost = new Image();
+            ghost.src = "ghost.png";
+
+            asphalt = new Image();
+            asphalt.src = "asphalt.jpg";
+        }
+
+        function getKeyDown(event){
+            var keyValue;
+            if(event == null) return;
+            else {
+                keyValue=event.keyCode;
+                event.preventDefault();
+            }
+            if(keyValue == "87") keyValue = "38";       //up
+            else if(keyValue == "83") keyValue = "40";  //down
+            else if(keyValue == "65") keyValue = "37";  //left
+            else if(keyValue == "68") keyValue = "39";  //right
+            keyPressOn[keyValue] = true;
+        }
+
+        function getKeyUp(event){
+            var keyValue;
+            if(event == null){
+                keyValue = window.event.keyCode;
+                window.event.preventDefault();
+            }
+            else{
+                keyValue=event.keyCode;
+                event.preventDefault();
+            }
+            if(keyValue == "87") keyValue = "38";       //up
+            else if(keyValue == "83") keyValue = "40";  //down
+            else if(keyValue == "65") keyValue = "37";  //left
+            else if(keyValue == "68") keyValue = "39";  //right
+            keyPressOn[keyValue] = false;
+        }
+
+        function gameLoop(){  
+            calcKeyInnput();
+            displayAll();
+        }
+        
+        function calcKeyInnput(){
+            if(keyPressOn["38"] && playerUnit.y >= -playerUnit.height/2)
+                playerUnit.y -= playerUnit.speed;  //up
+            if(keyPressOn["40"] && playerUnit.y <= canvas.height -playerUnit.height/2)
+                playerUnit.y += playerUnit.speed;  //down
+            if(keyPressOn["37"] && playerUnit.x >= -playerUnit.width/2)
+                playerUnit.x -= playerUnit.speed;  //left
+            if(keyPressOn["39"] && playerUnit.x <= canvas.width -playerUnit.width/2)
+                playerUnit.x += playerUnit.speed;  //right
+        }
+
+        function displayAll(){
+            drawRoad();
+            //bufferCtx.fillStyle = "#ccf";
+            //bufferCtx.fillRect(0, 0, canvas.width, canvas.height);
+            bufferCtx.drawImage(character, //Source Image
+                playerUnit.x, playerUnit.y, //View Position
+                playerUnit.width, playerUnit.height //View Size
+            );
+
+            bufferCtx.drawImage(ghost, //Source Image
+            ghostUnit.x, ghostUnit.y, //View Position
+            ghostUnit.width, ghostUnit.height //View Size
+            );
+
+
+            canvasCtx.drawImage(canvasBuffer, 0, 0);
+        }
+
+        function drawRoad(){
+            var width = canvas.width;
+            var height = canvas.height;
+            bufferCtx.drawImage(asphalt, 0, 0, width, height);
+
+            bufferCtx.fillStyle = "rgb(206, 206, 206)";
+            // Left
+            bufferCtx.beginPath();
+            bufferCtx.moveTo(0,0);
+            bufferCtx.lineTo(canvas.width*0.065,0);
+            bufferCtx.lineTo(0,height*0.7);
+            bufferCtx.closePath();
+            bufferCtx.fill();
+            // Right
+            bufferCtx.beginPath();
+            bufferCtx.moveTo(width,0);
+            bufferCtx.lineTo(width - width*0.065,0);
+            bufferCtx.lineTo(width,height*0.7);
+            bufferCtx.closePath();
+            bufferCtx.fill();
+
+            // 보도
+            bufferCtx.fillStyle = "rgb(244, 177, 131)";
+            // Left
+            bufferCtx.beginPath();
+            bufferCtx.moveTo(0,0);
+            bufferCtx.lineTo(width*0.04,0);
+            bufferCtx.lineTo(0,height*0.4);
+            bufferCtx.closePath();
+            bufferCtx.fill();
+            // Right
+            bufferCtx.beginPath();
+            bufferCtx.moveTo(width,0);
+            bufferCtx.lineTo(width - width*0.04,0);
+            bufferCtx.lineTo(width,height*0.4);
+            bufferCtx.closePath();
+            bufferCtx.fill();
+
+            // 중앙선
+            bufferCtx.fillStyle = "rgb(255, 192, 0)";  
+            bufferCtx.fillRect (width * 0.485, 0, width*0.014, height);
+            bufferCtx.fillRect (width * 0.515, 0, width*0.014, height);
+
+            // 차선
+            bufferCtx.fillStyle = "rgb(255, 255, 255)"; 
+            // Left
+            bufferCtx.rotate((5/180)*Math.PI);
+            bufferCtx.fillRect (width * 0.27, 0, width*0.014, height*0.1);
+            bufferCtx.fillRect (width * 0.27, 150, width*0.014, height*0.1);
+            bufferCtx.fillRect (width * 0.27, 300, width*0.014, height*0.1);
+            bufferCtx.fillRect (width * 0.27, 450, width*0.014, height*0.1);
+            bufferCtx.fillRect (width * 0.27, 600, width*0.014, height*0.1);
+            bufferCtx.rotate((-5/180)*Math.PI);
+            // Right
+            bufferCtx.rotate((-5/180)*Math.PI);
+            bufferCtx.fillRect (width * (1-0.28), 110, width*0.014, height*0.1);
+            bufferCtx.fillRect (width * (1-0.28), 260, width*0.014, height*0.1);
+            bufferCtx.fillRect (width * (1-0.28), 410, width*0.014, height*0.1);
+            bufferCtx.fillRect (width * (1-0.28), 560, width*0.014, height*0.1);
+            bufferCtx.fillRect (width * (1-0.28), 710, width*0.014, height*0.1);
+            bufferCtx.rotate((5/180)*Math.PI);
+        }
+    </script>
 </html>
