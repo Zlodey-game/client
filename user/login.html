@@ -5,20 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Zlodey 로그인</title>
 </head>
+<link rel="stylesheet" href="users.css">
 <body>
-    <form action="192.168.0.37:3000/login" id="loginForm" method="post">
-        <legend>로그인</legend>
-        <input type = "text" name = "id" placeholder="아이디"/><br><br>
-        <input type = "password" name = "passwd" placeholder="비밀번호"/><br><br>
-        <input type = "submit" id = "submit" value = "submit" disabled/>
-    </form>
+    <div class="leftPanel">
+        <img src="../resources/logo_black.png" id="logoImg" alt="">
+        
+        <form action="http://34.64.253.156:3000/users/login" id="loginForm" method="post">
+            <h1>로그인</h1>    
+            <input type = "text" name = "id" placeholder="아이디"/><br>
+            <input type = "password" name = "pw" placeholder="비밀번호"/>
+            <br><br><br><br>
+            <input type = "submit" id = "submit" value="" disabled/>
+        </form>
+        <a href="users/register" id = "foot">계정 생성</a>
+    </div>
+    
 </body>
 <script>
     var form = document.getElementById('loginForm');
     
     form.addEventListener('input', e =>{
         var id = form.id.value;
-        var passwd = form.passwd.value;
+        var passwd = form.pw.value;
         
         if(id !='' && passwd != '') form.submit.disabled = false;
         else form.submit.disabled = true;
