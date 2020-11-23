@@ -14,9 +14,14 @@
         <form action="http://34.64.253.156:3000/users/register" id="join" method="post">
             <h1>회원가입</h1>
             <input type = "text" name = "nickname" placeholder = "닉네임"/>
-            <br><br>
+            <br>
             <input type = "text" name = "id" placeholder = "아이디"/>
-            <br><br>
+            <br>
+            <div class="pwck" id="id-no">
+                영문과 숫자로 조합되어야 합니다.
+            </div>
+            <br>
+            
             <input type = "password" id = "passwd" name = "pw" placeholder = "비밀번호"/>
             <br>
             <input type = "password" id = "passwdck" name = "passwdcheck" placeholder = "비밀번호 확인"/>
@@ -32,7 +37,7 @@
             <br>
             <input type = "submit" id = "send" value = "" disabled/>       
         </form>
-        <a href="users/login" id = "foot">이미 계정이 있으신가요?</a>
+        <a href="/users/login" id = "foot">이미 계정이 있으신가요?</a>
     </div>
 </body>
 <script>
@@ -40,19 +45,37 @@
 
     var passwd = document.getElementById('passwd');
     var passwdck = document.getElementById('passwdck');
+    
     var ok = document.getElementById('pw-ok');
     var no = document.getElementById('pw-no');
+    var idNo = document.getElementById('id-no');
 
     var passwdCorrect = false;
+    var idCorrect = false;
 
     form.addEventListener("input", e =>{
-        if(form.nickname.value != '' && form.id.value != '' && passwdCorrect){
+        if(form.nickname.value != '' && form.id.value != '' && passwdCorrect && idCorrect){
             form.send.disabled = false;
         }
         else form.send.disabled = true;
     });
 
-    passwd.addEventListener("input", e =>{
+    form.id.addEventListener("input", e => {
+        var id = form.id.value;
+        if(/[a-zA-Z]/.test(id) || id == ''){
+            idNo.style.display = "none";
+
+            if(/[a-zA-Z][0-9a-zA-Z]/.test(id)){
+                idCorrect = true;   
+            }
+        }
+        else{
+            idCorrect = false;
+            idNo.style.display = "inline";
+        }
+    });
+
+    passwd.addEventListener("input", e => {
         checkPasswd();
     });
 
@@ -61,8 +84,11 @@
     });
     
     var checkPasswd = () =>{
+        
+
         var pw = passwd.value;
         var pwck = passwdck.value;
+
         if(pwck != ''){
             if(pw == pwck){
                 ok.style.display = "inline";

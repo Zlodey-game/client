@@ -17,7 +17,7 @@
             <br><br><br><br>
             <input type = "submit" id = "submit" value="" disabled/>
         </form>
-        <a href="users/register" id = "foot">계정 생성</a>
+        <a href="/users/register" id = "foot">계정 생성</a>
     </div>
     
 </body>
@@ -31,6 +31,9 @@
         if(id !='' && passwd != '') form.submit.disabled = false;
         else form.submit.disabled = true;
     });
-    
+    form.id.onkeyup = function(e){
+        var v = this.value;
+    this.value = v.replace(/[^a-z0-9]/gi, '');
+}
 </script>
 </html>

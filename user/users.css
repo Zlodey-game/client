@@ -64,7 +64,7 @@ input[type=text], input[type=password] {
     border-radius: 3px;
     width: 80%;
     padding: 15px;
-    margin: 5px 0 22px 0;
+    margin: 20px 0 5px 0;
     border: none;
     background-color: #EDEDED;
 }
@@ -105,6 +105,11 @@ input[type=text]::placeholder, input[type=password]::placeholder{
     /* margin-right: 50%; */
 }
 #pw-no{
+    color: #d92742;
+    font-weight: bold;
+    /* margin-right: 40%; */
+}
+#id-no{
     color: #d92742;
     font-weight: bold;
     /* margin-right: 40%; */
