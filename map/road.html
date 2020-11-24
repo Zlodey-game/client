@@ -8,240 +8,377 @@
     
 </head>
 <!-- <body onload="draw();"> -->
-<body>
-    <!-- <script>draw();</script> -->
+<body style="margin: 0;">
     <canvas id="canvas">
     </canvas>
 </body>
-    <script type="application/javascript">
-        var canvas;
-        var canvasCtx;
+<script type="application/javascript">
+    var canvas;
+    var canvasCtx;
 
-        var canvasBuffer;
-        var bufferCtx;
+    var canvasBuffer;
+    var bufferCtx;
 
-        var canvasOldWidth;
-        var canvasOldHeight;
+    var canvasOldWidth;
+    var canvasOldHeight;
 
-        var playerUnit = {}; //Player Unit Property
-        var ghostUnit = {}; //Player Unit Property
+    var playerUnit = {}; //Player Unit Property
+    var ghostUnit = {}; //Player Unit Property
 
-        var threadSpeed = 10;     //Gap of Thread
-        var keyPressOn = {};//pressed - trueaaaaaa
+    var threadSpeed = 10;     //Gap of Thread
+    var keyPressOn = {};//pressed - trueaaaaaa
 
-        var character;
-        var asphalt;
+    var character;
+    var asphalt;
 
-        var gameLoopThread;  //animation Thread ID
+    var gameLoopThread;  //animation Thread ID
 
-        window.onload = function(e) {
-            canvas = document.getElementById('canvas'); 
-            canvasBuffer = document.createElement("canvas");       
-            setCanvasSize();
+    window.onload = function(e) {
+        canvas = document.getElementById('canvas'); 
+        canvasBuffer = document.createElement("canvas");       
+        setCanvasSize();
+    }
+    
+    window.onresize = function(e) {
+        setCanvasSize();
+    }
+    
+    function setCanvasSize() {
+        const browserWidth = window.innerWidth;
+        const browserHeight = window.innerHeight-4;
+
+        if(browserWidth / browserHeight < 1.777) { //  width small
+            canvas.width = browserWidth;
+            canvas.height = browserWidth * 0.5625;
+        }
+        else{
+            canvas.width = browserHeight * 1.777;
+            canvas.height = browserHeight;
         }
         
-        window.onresize = function(e) {
-            setCanvasSize();
+        canvasBuffer.width = canvas.width;
+        canvasBuffer.height = canvas.height;
+
+        setUnitSize(playerUnit, 0.093, 0.222, 5);
+        setUnitSize(ghostUnit, 0.093, 0.166), 5;
+
+        canvasOldWidth = canvas.width;
+        canvasOldHeight = canvas.height;
+    }
+
+    const setUnitSize = (unit, wd, hd, speed) => {
+        unit.width = canvas.width*wd;
+        unit.height = canvas.height*hd;
+            //width: 120,
+            //height: 160,
+        unit.X_speed = canvas.width*0.0008*speed;
+        unit.Y_speed = canvas.height*0.0014*speed;
+
+        if(unit.x == undefined){
+            unit.x = canvas.width / 2 - unit.width / 2;
+            unit.y = canvas.height / 2 - unit.height / 2;
         }
+        else{
+            unit.x = unit.x * (canvas.width / canvasOldWidth);
+            unit.y = unit.y * (canvas.height / canvasOldHeight);
+        }
+    }
+
+
+    window.addEventListener("load", init, false);
+
+    function init(){
+        //canvas = document.getElementById("canvas");
+        canvasCtx = canvas.getContext("2d");
+
+        bufferCtx = canvasBuffer.getContext("2d");
+
+        playerUnit.x = canvas.width / 2 - 18;
+        playerUnit.y = canvas.height / 2 - 18;
+
+        ghostUnit.x = canvas.width / 2 - 18;
+        ghostUnit.y = canvas.height / 2 - 18;
+
+        document.addEventListener("keydown", getKeyDown, false);
+        document.addEventListener("keyup", getKeyUp, false);
+
+        setImage();
+
+        gameLoopThread = setInterval(gameLoop, threadSpeed);
+    }
+
+    function setImage(){
+        character = new Image();
+        character.src = "char.png";
+
+        ghost = new Image();
+        ghost.src = "ghost.png";
+
+        asphalt = new Image();
+        asphalt.src = "asphalt.jpg";
+    }
+
+    function getKeyDown(event){
+        var keyValue;
+        if(event == null) return;
+        else {
+            keyValue=event.keyCode;
+            event.preventDefault();
+        }
+        if(keyValue == "87") keyValue = "38";       //up
+        else if(keyValue == "83") keyValue = "40";  //down
+        else if(keyValue == "65") keyValue = "37";  //left
+        else if(keyValue == "68") keyValue = "39";  //right
+        keyPressOn[keyValue] = true;
+    }
+
+    function getKeyUp(event){
+        var keyValue;
+        if(event == null){
+            keyValue = window.event.keyCode;
+            window.event.preventDefault();
+        }
+        else{
+            keyValue=event.keyCode;
+            event.preventDefault();
+        }
+        if(keyValue == "87") keyValue = "38";       //up
+        else if(keyValue == "83") keyValue = "40";  //down
+        else if(keyValue == "65") keyValue = "37";  //left
+        else if(keyValue == "68") keyValue = "39";  //right
+        keyPressOn[keyValue] = false;
+    }
+
+    function gameLoop(){  
+        calcKeyInnput();
+        displayAll();
+    }
+    
+    function calcKeyInnput(){
+        if(keyPressOn["38"] && playerUnit.y >= -playerUnit.height/2)
+            playerUnit.y -= playerUnit.Y_speed;  //up
+        if(keyPressOn["40"] && playerUnit.y <= canvas.height -playerUnit.height/2)
+            playerUnit.y += playerUnit.Y_speed;  //down
+        if(keyPressOn["37"] && playerUnit.x >= -playerUnit.width/2)
+            playerUnit.x -= playerUnit.X_speed;  //left
+        if(keyPressOn["39"] && playerUnit.x <= canvas.width -playerUnit.width/2)
+            playerUnit.x += playerUnit.X_speed;  //right
+    }
+
+    function displayAll(){
+        drawRoad();
+
+        bufferCtx.drawImage(character, //Source Image
+            playerUnit.x, playerUnit.y, //View Position
+            playerUnit.width, playerUnit.height //View Size
+        );
+
+        bufferCtx.drawImage(ghost, //Source Image
+            ghostUnit.x, ghostUnit.y, //View Position
+            ghostUnit.width, ghostUnit.height //View Size
+        );
+
+        drawUI();
         
-        function setCanvasSize() {
-            const browserWidth = window.innerWidth - 19;
-            const browserHeight = window.innerHeight - 20;
+        canvasCtx.drawImage(canvasBuffer, 0, 0);
+    }
 
-            if(browserWidth / browserHeight < 1.777) { //  width small
-                canvas.width = browserWidth;
-                canvas.height = browserWidth * 0.5625;
-            }
-            else{
-                canvas.width = browserHeight * 1.777;
-                canvas.height = browserHeight;
-            }
-            
-            canvasBuffer.width = canvas.width;
-            canvasBuffer.height = canvas.height;
-
-            setUnitSize(playerUnit, 0.093, 0.222, 5);
-            setUnitSize(ghostUnit, 0.093, 0.166), 5;
-
-            canvasOldWidth = canvas.width;
-            canvasOldHeight = canvas.height;
-        }
-
-        const setUnitSize = (unit, wd, hd, speed) => {
-            unit.width = canvas.width*wd;
-            unit.height = canvas.height*hd;
-                //width: 120,
-                //height: 160,
-            unit.X_speed = canvas.width*0.0008*speed;
-            unit.Y_speed = canvas.height*0.0014*speed;
-
-            if(unit.x == undefined){
-                unit.x = canvas.width / 2 - unit.width / 2;
-                unit.y = canvas.height / 2 - unit.height / 2;
-            }
-            else{
-                unit.x = unit.x * (canvas.width / canvasOldWidth);
-                unit.y = unit.y * (canvas.height / canvasOldHeight);
-            }
-        }
-
-
-        window.addEventListener("load", init, false);
-
-        function init(){
-            //canvas = document.getElementById("canvas");
-            canvasCtx = canvas.getContext("2d");
-
-            bufferCtx = canvasBuffer.getContext("2d");
-
-            playerUnit.x = canvas.width / 2 - 18;
-            playerUnit.y = canvas.height / 2 - 18;
-
-            ghostUnit.x = canvas.width / 2 - 18;
-            ghostUnit.y = canvas.height / 2 - 18;
-
-            document.addEventListener("keydown", getKeyDown, false);
-            document.addEventListener("keyup", getKeyUp, false);
-
-            setImage();
-
-            gameLoopThread = setInterval(gameLoop, threadSpeed);
-        }
-
-        function setImage(){
-            character = new Image();
-            character.src = "char.png";
-
-            ghost = new Image();
-            ghost.src = "ghost.png";
-
-            asphalt = new Image();
-            asphalt.src = "asphalt.jpg";
-        }
-
-        function getKeyDown(event){
-            var keyValue;
-            if(event == null) return;
-            else {
-                keyValue=event.keyCode;
-                event.preventDefault();
-            }
-            if(keyValue == "87") keyValue = "38";       //up
-            else if(keyValue == "83") keyValue = "40";  //down
-            else if(keyValue == "65") keyValue = "37";  //left
-            else if(keyValue == "68") keyValue = "39";  //right
-            keyPressOn[keyValue] = true;
-        }
-
-        function getKeyUp(event){
-            var keyValue;
-            if(event == null){
-                keyValue = window.event.keyCode;
-                window.event.preventDefault();
-            }
-            else{
-                keyValue=event.keyCode;
-                event.preventDefault();
-            }
-            if(keyValue == "87") keyValue = "38";       //up
-            else if(keyValue == "83") keyValue = "40";  //down
-            else if(keyValue == "65") keyValue = "37";  //left
-            else if(keyValue == "68") keyValue = "39";  //right
-            keyPressOn[keyValue] = false;
-        }
-
-        function gameLoop(){  
-            calcKeyInnput();
-            displayAll();
-        }
+    function drawUI(){
+        let box = {
+            width : canvas.width * 0.34,
+            height : canvas.height * 0.12,
+            radius : canvas.width * 0.01,
+            lineWidth : canvas.width * 0.008
+        };
+        let bar = {
+            width : box.width * 0.93,
+            height : box.height * 0.1,
+            radius : box.radius * 0.1,
+            lineWidth : box.lineWidth * 0.4
+        };
+        let inven = {
+            len : box.width * 0.07,
+            radius : box.radius * 0.1,
+            lineWidth : box.lineWidth * 0.6 
+        };
+        //console.log(box);
+        drawBox('#102020', '#726447', box );
         
-        function calcKeyInnput(){
-            if(keyPressOn["38"] && playerUnit.y >= -playerUnit.height/2)
-                playerUnit.y -= playerUnit.Y_speed;  //up
-            if(keyPressOn["40"] && playerUnit.y <= canvas.height -playerUnit.height/2)
-                playerUnit.y += playerUnit.Y_speed;  //down
-            if(keyPressOn["37"] && playerUnit.x >= -playerUnit.width/2)
-                playerUnit.x -= playerUnit.X_speed;  //left
-            if(keyPressOn["39"] && playerUnit.x <= canvas.width -playerUnit.width/2)
-                playerUnit.x += playerUnit.X_speed;  //right
+        drawBar('#00B801', '$111', bar, box, 0.7);
+        drawBar('#2183F3', '$111', bar, box, 0.9);
+
+        for(let i=0; i<9; i++){
+            drawInven('#050D0B','#726447', inven, box, i, ghost);    
         }
 
-        function displayAll(){
-            drawRoad();
+        
+        // bufferCtx.translate( (canvas.width - box.width)/2 ,canvas.height - box.height);
+        // bufferCtx.translate( (box.width - info.len)/9 , (box.height * 0.5 - info.len));
 
-            bufferCtx.drawImage(character, //Source Image
-                playerUnit.x, playerUnit.y, //View Position
-                playerUnit.width, playerUnit.height //View Size
-            );
+        // bufferCtx.beginPath();
+        // bufferCtx.moveTo(0, info.radius);
+        // bufferCtx.quadraticCurveTo(0, 0, info.radius, 0);
+        // bufferCtx.lineTo(info.len - info.radius, 0);
+        // bufferCtx.quadraticCurveTo(info.len, 0, info.len, info.radius);
+        // bufferCtx.lineTo(info.len, info.len-info.radius);
+        // bufferCtx.quadraticCurveTo(info.len, info.len, info.len - info.radius, info.len);
+        // bufferCtx.lineTo(info.radius, info.len);
+        // bufferCtx.quadraticCurveTo(0, info.len, 0, info.len-info.radius);
+        // bufferCtx.lineTo(0, info.radius);
 
-            bufferCtx.drawImage(ghost, //Source Image
-                ghostUnit.x, ghostUnit.y, //View Position
-                ghostUnit.width, ghostUnit.height //View Size
-            );
+        // bufferCtx.strokeStyle = '#726447';        // set the color for the circle to 'green'
+        // bufferCtx.lineWidth = info.lineWidth;  
+        // bufferCtx.stroke();
+        // bufferCtx.fillStyle = '#050D0B';  
+        // bufferCtx.fill();
 
+        // bufferCtx.translate( - (box.width - info.len)/9 , - (box.height * 0.5 - info.len));
+        // bufferCtx.translate( -(canvas.width - box.width)/2 , -(canvas.height - box.height));
+    }
 
-            canvasCtx.drawImage(canvasBuffer, 0, 0);
+    function drawInven(fill, line, info, pInfo, idx, img){
+        bufferCtx.translate( (canvas.width - pInfo.width)/2 ,canvas.height - pInfo.height);
+        // bufferCtx.translate( (pInfo.width - info.len)/2 , (pInfo.height * 0.5 - info.len));
+        bufferCtx.translate( (((pInfo.width - info.len)/2) - ((info.len + info.lineWidth + info.len * 0.2) * (idx-4))), (pInfo.height * 0.47 - info.len));
+        // + (info.len + info.lineWidth + info.len * 0.1) * idx 
+        
+
+        bufferCtx.beginPath();
+        bufferCtx.moveTo(0, info.radius);
+        bufferCtx.quadraticCurveTo(0, 0, info.radius, 0);
+        bufferCtx.lineTo(info.len - info.radius, 0);
+        bufferCtx.quadraticCurveTo(info.len, 0, info.len, info.radius);
+        bufferCtx.lineTo(info.len, info.len-info.radius);
+        bufferCtx.quadraticCurveTo(info.len, info.len, info.len - info.radius, info.len);
+        bufferCtx.lineTo(info.radius, info.len);
+        bufferCtx.quadraticCurveTo(0, info.len, 0, info.len - info.radius);
+        bufferCtx.lineTo(0, info.radius);
+
+        bufferCtx.strokeStyle = line;        // set the color for the circle to 'green'
+        bufferCtx.lineWidth = info.lineWidth;  
+        bufferCtx.stroke();
+        //if(img == null || img == undefined){
+            bufferCtx.fillStyle = fill;  
+            bufferCtx.fill();
+        
+        if(img != null){
+            bufferCtx.drawImage(img, 0, 0, info.len, info.len);
         }
+        bufferCtx.translate( -(((pInfo.width - info.len)/2) - ((info.len + info.lineWidth + info.len * 0.2) * (idx-4))), - (pInfo.height * 0.47 - info.len));
+        bufferCtx.translate( -(canvas.width - pInfo.width)/2 , -(canvas.height - pInfo.height));
+    }
 
-        function drawRoad(){
-            var width = canvas.width;
-            var height = canvas.height;
-            bufferCtx.drawImage(asphalt, 0, 0, width, height);
+    function drawBox(fill, line, info){
+        bufferCtx.translate( (canvas.width - info.width)/2 ,canvas.height - info.height);
+        // bufferCtx.fillStyle = "#ffffff";  
+        // bufferCtx.fillRect (0, 0, box.width, box.height);
+        bufferCtx.beginPath();
+        bufferCtx.moveTo(0, info.radius);
+        bufferCtx.quadraticCurveTo(0, 0, info.radius, 0);
+        bufferCtx.lineTo(info.width - info.radius, 0);
+        bufferCtx.quadraticCurveTo(info.width, 0, info.width, info.radius);
 
-            bufferCtx.fillStyle = "rgb(206, 206, 206)";
-            // Left
-            bufferCtx.beginPath();
-            bufferCtx.moveTo(0,0);
-            bufferCtx.lineTo(canvas.width*0.065,0);
-            bufferCtx.lineTo(0,height*0.7);
-            bufferCtx.closePath();
-            bufferCtx.fill();
-            // Right
-            bufferCtx.beginPath();
-            bufferCtx.moveTo(width,0);
-            bufferCtx.lineTo(width - width*0.065,0);
-            bufferCtx.lineTo(width,height*0.7);
-            bufferCtx.closePath();
-            bufferCtx.fill();
+        bufferCtx.lineTo(info.width, info.height);
+        bufferCtx.lineTo(0, info.height);
+        //bufferCtx.lineTo(box.width, box.height-box.radius);
+        //bufferCtx.quadraticCurveTo(box.width, box.height, box.width - box.radius, box.height);
+        //bufferCtx.lineTo(box.radius, box.height);
+        //bufferCtx.quadraticCurveTo(0, box.height, 0, box.height-box.radius);
+        bufferCtx.lineTo(0, info.radius);
+        // bufferCtx.quadraticCurveTo(125, 25, 75, 25);
+        bufferCtx.strokeStyle = '#726447';        // set the color for the circle to 'green'
+        bufferCtx.lineWidth = info.lineWidth;  
+        bufferCtx.stroke();
+        bufferCtx.fillStyle = "#102020 ";  
+        bufferCtx.fill();
+        
+        bufferCtx.translate( -(canvas.width - info.width)/2 , -canvas.height + info.height);
+    }
 
-            // 보도
-            bufferCtx.fillStyle = "rgb(244, 177, 131)";
-            // Left
-            bufferCtx.beginPath();
-            bufferCtx.moveTo(0,0);
-            bufferCtx.lineTo(width*0.04,0);
-            bufferCtx.lineTo(0,height*0.4);
-            bufferCtx.closePath();
-            bufferCtx.fill();
-            // Right
-            bufferCtx.beginPath();
-            bufferCtx.moveTo(width,0);
-            bufferCtx.lineTo(width - width*0.04,0);
-            bufferCtx.lineTo(width,height*0.4);
-            bufferCtx.closePath();
-            bufferCtx.fill();
+    function drawBar(fill, line, info, pInfo, height){
+        bufferCtx.translate( (canvas.width - pInfo.width)/2 ,canvas.height - pInfo.height);
+        bufferCtx.translate( (pInfo.width - info.width)/2 , (pInfo.height * height - info.height));
 
-            // 중앙선
-            bufferCtx.fillStyle = "rgb(255, 192, 0)";  
-            bufferCtx.fillRect (width * 0.485, 0, width*0.014, height);
-            bufferCtx.fillRect (width * 0.515, 0, width*0.014, height);
+        bufferCtx.beginPath();
+        bufferCtx.moveTo(0, info.radius);
+        bufferCtx.quadraticCurveTo(0, 0, info.radius, 0);
+        bufferCtx.lineTo(info.width - info.radius, 0);
+        bufferCtx.quadraticCurveTo(info.width, 0, info.width, info.radius);
+        bufferCtx.lineTo(info.width, info.height-info.radius);
+        bufferCtx.quadraticCurveTo(info.width, info.height, info.width - info.radius, info.height);
+        bufferCtx.lineTo(info.radius, info.height);
+        bufferCtx.quadraticCurveTo(0, info.height, 0, info.height-info.radius);
+        bufferCtx.lineTo(0, info.radius);
 
-            const lineLen = height*0.208;
-            const rightGap = height*0.152;
-            // 차선
-            bufferCtx.fillStyle = "rgb(255, 255, 255)"; 
-            // Left
-            bufferCtx.rotate((5/180)*Math.PI);
-            for(let i=0; i<5; i++){
-                bufferCtx.fillRect (width * 0.27, lineLen * i, width*0.014, height*0.1);    
-            }
-            bufferCtx.rotate((-5/180)*Math.PI);
-            // Right
-            bufferCtx.rotate((-5/180)*Math.PI);
-            for(let i=0; i<5; i++){
-                bufferCtx.fillRect (width * (1-0.28), rightGap + lineLen * i, width*0.014, height*0.1);    
-            }
-            bufferCtx.rotate((5/180)*Math.PI);
+        bufferCtx.strokeStyle = line;        // set the color for the circle to 'green'
+        bufferCtx.lineWidth = info.lineWidth;  
+        bufferCtx.stroke();
+        bufferCtx.fillStyle = fill;  
+        bufferCtx.fill();
+
+        bufferCtx.translate( - (pInfo.width - info.width)/2 , - (pInfo.height * height - info.height));
+        bufferCtx.translate( -(canvas.width - pInfo.width)/2 , -canvas.height + pInfo.height);
+    }
+
+    function drawRoad(){
+        var width = canvas.width;
+        var height = canvas.height;
+        bufferCtx.drawImage(asphalt, 0, 0, width, height);
+
+        bufferCtx.fillStyle = "rgb(206, 206, 206)";
+        // Left
+        bufferCtx.beginPath();
+        bufferCtx.moveTo(0,0);
+        bufferCtx.lineTo(canvas.width*0.065,0);
+        bufferCtx.lineTo(0,height*0.7);
+        bufferCtx.closePath();
+        bufferCtx.fill();
+        // Right
+        bufferCtx.beginPath();
+        bufferCtx.moveTo(width,0);
+        bufferCtx.lineTo(width - width*0.065,0);
+        bufferCtx.lineTo(width,height*0.7);
+        bufferCtx.closePath();
+        bufferCtx.fill();
+
+        // 보도
+        bufferCtx.fillStyle = "rgb(244, 177, 131)";
+        // Left
+        bufferCtx.beginPath();
+        bufferCtx.moveTo(0,0);
+        bufferCtx.lineTo(width*0.04,0);
+        bufferCtx.lineTo(0,height*0.4);
+        bufferCtx.closePath();
+        bufferCtx.fill();
+        // Right
+        bufferCtx.beginPath();
+        bufferCtx.moveTo(width,0);
+        bufferCtx.lineTo(width - width*0.04,0);
+        bufferCtx.lineTo(width,height*0.4);
+        bufferCtx.closePath();
+        bufferCtx.fill();
+
+        // 중앙선
+        bufferCtx.fillStyle = "rgb(255, 192, 0)";  
+        bufferCtx.fillRect (width * 0.485 - (width*0.014)/2, 0, width*0.014, height);
+        bufferCtx.fillRect (width * 0.515 - (width*0.014)/2, 0, width*0.014, height);
+
+        const lineLen = height*0.208;
+        const rightGap = height*0.152;
+        // 차선
+        bufferCtx.fillStyle = "rgb(255, 255, 255)"; 
+        // Left
+        bufferCtx.rotate((5/180)*Math.PI);
+        for(let i=0; i<5; i++){
+            bufferCtx.fillRect (width * 0.27 - (width*0.014)/2, lineLen * i, width*0.014, height*0.1);    
         }
-    </script>
+        bufferCtx.rotate((-5/180)*Math.PI);
+        // Right
+        bufferCtx.rotate((-5/180)*Math.PI);
+        for(let i=0; i<5; i++){
+            bufferCtx.fillRect (width * (1-0.28) - (width*0.014)/2, rightGap + lineLen * i, width*0.014, height*0.1);    
+        }
+        bufferCtx.rotate((5/180)*Math.PI);
+    }
+</script>
 </html>
