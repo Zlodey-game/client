@@ -10,7 +10,7 @@
 <!-- <body onload="draw();"> -->
 <body>
     <!-- <script>draw();</script> -->
-    <canvas id="canvas" width="1280" height="720">
+    <canvas id="canvas">
     </canvas>
 </body>
     <script type="application/javascript">
@@ -20,38 +20,110 @@
         var canvasBuffer;
         var bufferCtx;
 
+        var canvasOldWidth;
+        var canvasOldHeight;
+
         var playerUnit = {}; //Player Unit Property
+        var ghostUnit = {}; //Player Unit Property
+
         var threadSpeed = 10;     //Gap of Thread
-        var keyPressOn = {};//pressed - true
+        var keyPressOn = {};//pressed - trueaaaaaa
+
         var character;
         var asphalt;
+
         var gameLoopThread;  //animation Thread ID
+
+        window.onload = function(e) {
+            canvas = document.getElementById('canvas'); 
+            canvasBuffer = document.createElement("canvas");       
+            setCanvasSize();
+        }
+        
+        window.onresize = function(e) {
+            setCanvasSize();
+        }
+        
+        function setCanvasSize() {
+            const browserWidth = window.innerWidth - 19;
+            const browserHeight = window.innerHeight - 20;
+
+            
+
+            if(browserWidth / browserHeight < 1.777) { //  width small
+                canvas.width = browserWidth;
+                canvas.height = browserWidth * 0.5625;
+            }
+            else{
+                canvas.width = browserHeight * 1.777;
+                canvas.height = browserHeight;
+            }
+
+            //canvas.width = window.innerWidth - 19;
+            //canvas.height = window.innerHeight - 20;
+
+            
+            
+            canvasBuffer.width = canvas.width;
+            canvasBuffer.height = canvas.height;
+
+            setUnitSize(playerUnit, 0.093, 0.222, 5);
+            setUnitSize(ghostUnit, 0.093, 0.166), 5;
+
+            canvasOldWidth = canvas.width;
+            canvasOldHeight = canvas.height;
+
+            console.log(canvas.width);
+            console.log(canvas.height);
+        }
+
+        const setUnitSize = (unit, wd, hd, speed) => {
+            unit.width = canvas.width*wd;
+            unit.height = canvas.height*hd;
+                //width: 120,
+                //height: 160,
+            unit.X_speed = canvas.width*0.0008*speed;
+            unit.Y_speed = canvas.height*0.0014*speed;
+
+            if(unit.x == undefined){
+                unit.x = canvas.width / 2 - unit.width / 2;
+                unit.y = canvas.height / 2 - unit.height / 2;
+                //console.log(ghostUnit.x);
+            }
+            else{
+                unit.x = unit.x * (canvas.width / canvasOldWidth);
+                unit.y = unit.y * (canvas.height / canvasOldHeight);
+            }
+        }
+
+        
 
         window.addEventListener("load", init, false);
 
         function init(){
-            canvas = document.getElementById("canvas");
+            //canvas = document.getElementById("canvas");
             canvasCtx = canvas.getContext("2d");
-            canvasBuffer= document.createElement("canvas");
-            canvasBuffer.width = canvas.width;
-            canvasBuffer.height = canvas.height;
+            
+            
+           
             bufferCtx = canvasBuffer.getContext("2d");
 
-            playerUnit = {
-                x: canvas.width / 2 - 18,
-                y: canvas.height / 2 - 18,
-                width: 120,
-                height: 160,
-                speed: 7
-            }; //UserUnit Property
+            playerUnit.x = canvas.width / 2 - 18;
+            playerUnit.y = canvas.height / 2 - 18;
+            //     width: canvas.width*0.093,
+            //     height: canvas.height*0.222,
+            //     //width: 120,
+            //     //height: 160,
+            //     X_speed: canvas.width*0.004,
+            //     Y_speed: canvas.height*0.007
+             //UserUnit Property
 
-            ghostUnit = {
-                x: canvas.width / 2 - 18,
-                y: canvas.height / 2 - 18,
-                width: 120,
-                height: 120,
-                speed: 7
-            }; //UserUnit Property
+            ghostUnit.x = canvas.width / 2 - 18;
+            ghostUnit.y = canvas.height / 2 - 18;
+            //     width: canvas.width*0.093,
+            //     height: canvas.height*0.166,
+            //     speed: canvas.width*0.007
+             //UserUnit Property
 
             document.addEventListener("keydown", getKeyDown, false);
             document.addEventListener("keyup", getKeyUp, false);
@@ -109,13 +181,13 @@
         
         function calcKeyInnput(){
             if(keyPressOn["38"] && playerUnit.y >= -playerUnit.height/2)
-                playerUnit.y -= playerUnit.speed;  //up
+                playerUnit.y -= playerUnit.Y_speed;  //up
             if(keyPressOn["40"] && playerUnit.y <= canvas.height -playerUnit.height/2)
-                playerUnit.y += playerUnit.speed;  //down
+                playerUnit.y += playerUnit.Y_speed;  //down
             if(keyPressOn["37"] && playerUnit.x >= -playerUnit.width/2)
-                playerUnit.x -= playerUnit.speed;  //left
+                playerUnit.x -= playerUnit.X_speed;  //left
             if(keyPressOn["39"] && playerUnit.x <= canvas.width -playerUnit.width/2)
-                playerUnit.x += playerUnit.speed;  //right
+                playerUnit.x += playerUnit.X_speed;  //right
         }
 
         function displayAll(){
@@ -128,10 +200,11 @@
             );
 
             bufferCtx.drawImage(ghost, //Source Image
-            ghostUnit.x, ghostUnit.y, //View Position
-            ghostUnit.width, ghostUnit.height //View Size
+                ghostUnit.x, ghostUnit.y, //View Position
+                ghostUnit.width, ghostUnit.height //View Size
             );
 
+            console.log(playerUnit.width);
 
             canvasCtx.drawImage(canvasBuffer, 0, 0);
         }
@@ -179,23 +252,31 @@
             bufferCtx.fillRect (width * 0.485, 0, width*0.014, height);
             bufferCtx.fillRect (width * 0.515, 0, width*0.014, height);
 
+            const lineLen = height*0.208;
+            const rightGap = height*0.152;
             // 차선
             bufferCtx.fillStyle = "rgb(255, 255, 255)"; 
             // Left
             bufferCtx.rotate((5/180)*Math.PI);
-            bufferCtx.fillRect (width * 0.27, 0, width*0.014, height*0.1);
-            bufferCtx.fillRect (width * 0.27, 150, width*0.014, height*0.1);
-            bufferCtx.fillRect (width * 0.27, 300, width*0.014, height*0.1);
-            bufferCtx.fillRect (width * 0.27, 450, width*0.014, height*0.1);
-            bufferCtx.fillRect (width * 0.27, 600, width*0.014, height*0.1);
+            for(let i=0; i<5; i++){
+                bufferCtx.fillRect (width * 0.27, lineLen * i, width*0.014, height*0.1);    
+            }
+            // bufferCtx.fillRect (width * 0.27, 0, width*0.014, height*0.1);
+            // bufferCtx.fillRect (width * 0.27, 150, width*0.014, height*0.1);
+            // bufferCtx.fillRect (width * 0.27, 300, width*0.014, height*0.1);
+            // bufferCtx.fillRect (width * 0.27, 450, width*0.014, height*0.1);
+            // bufferCtx.fillRect (width * 0.27, 600, width*0.014, height*0.1);
             bufferCtx.rotate((-5/180)*Math.PI);
             // Right
             bufferCtx.rotate((-5/180)*Math.PI);
-            bufferCtx.fillRect (width * (1-0.28), 110, width*0.014, height*0.1);
-            bufferCtx.fillRect (width * (1-0.28), 260, width*0.014, height*0.1);
-            bufferCtx.fillRect (width * (1-0.28), 410, width*0.014, height*0.1);
-            bufferCtx.fillRect (width * (1-0.28), 560, width*0.014, height*0.1);
-            bufferCtx.fillRect (width * (1-0.28), 710, width*0.014, height*0.1);
+            for(let i=0; i<5; i++){
+                bufferCtx.fillRect (width * (1-0.28), rightGap + lineLen * i, width*0.014, height*0.1);    
+            }
+            // bufferCtx.fillRect (width * (1-0.28), 110, width*0.014, height*0.1);
+            // bufferCtx.fillRect (width * (1-0.28), 260, width*0.014, height*0.1);
+            // bufferCtx.fillRect (width * (1-0.28), 410, width*0.014, height*0.1);
+            // bufferCtx.fillRect (width * (1-0.28), 560, width*0.014, height*0.1);
+            // bufferCtx.fillRect (width * (1-0.28), 710, width*0.014, height*0.1);
             bufferCtx.rotate((5/180)*Math.PI);
         }
     </script>
