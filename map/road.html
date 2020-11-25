@@ -234,13 +234,17 @@
         var startAngle = 0; // Starting point on circle
         //var endAngle = Math.PI + (Math.PI * j) / 2; // End point on circle
         //var anticlockwise = i % 2 == 0 ? false : true; // clockwise or anticlockwis
-        setPlayerStatus(playerUnit, 'speed');
-        drawUnit(playerUnit);
+        
+
+        drawDroppedItems();
 
         for(unit of monsters){
             drawUnit(unit, ghost);
             drawMonsterHPBar('#050D0B', '#BC252A', '#726447', unit);
         }
+
+        setPlayerStatus(playerUnit, 'speed');
+        drawUnit(playerUnit);
 
         drawMainUI();
         
@@ -278,10 +282,12 @@
         let max = Math.floor(14);
         
         var itemNum = Math.floor(Math.random() * (max - min)) + min; //최댓값은 제외, 최솟값은 포함
+
         console.log(x, y, itemNum);
         var item = {
+            itemId : itemNum,
             x : x,
-            y : y,
+            y : y
         }
         droppedItems.push(item);
     }
@@ -289,9 +295,9 @@
     function drawDroppedItems(){
         console.log(droppedItems);
         for(item of droppedItems){
-            bufferCtx.drawImage(items[item], //Source Image
+            bufferCtx.drawImage(items[item.itemId], //Source Image
                 item.x, item.y, //View Position
-                canvas.width * 0.01, canvas.width * 0.01 //View Size
+                canvas.width * 0.07, canvas.width * 0.07 //View Size
             );
         }
     }
@@ -447,6 +453,7 @@
 
     function drawUnit(unit, img = undefined){
         if(img == undefined){
+            bufferCtx.beginPath();
             bufferCtx.arc(unit.x + unit.width / 2, unit.y + unit.height / 2, unit.width / 2, 0, (Math.PI/180)*360, 1);
             bufferCtx.fillStyle = '#F8C574';
             bufferCtx.strokeStyle = '#352C17'
