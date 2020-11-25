@@ -29,6 +29,8 @@
     var pointer = {};
     var inventory = [];
 
+    var droppedItems = [];
+
     
     var ghostUnit = {}; //Player Unit Property
 
@@ -79,8 +81,8 @@
         unit.height = canvas.height*hd;
             //width: 120,
             //height: 160,
-        unit.X_speed = canvas.width*0.0008*speed;
-        unit.Y_speed = canvas.height*0.0014*speed;
+        unit.oX_speed = canvas.width*0.0008*speed;
+        unit.oY_speed = canvas.height*0.0014*speed;
 
         if(unit.x == undefined){
             unit.x = canvas.width / 2 - unit.width / 2;
@@ -94,6 +96,13 @@
 
     function setUnitAngle(unit, x, y){
         unit.agl = Math.atan2(x - (unit.x + unit.width/2) , (unit.y + unit.height/2) - y) * 180 / Math.PI;
+    }
+
+    function setPlayerStatus(unit, mode){
+        if(mode == 'speed'){
+            unit.X_speed = unit.oX_speed + unit.oX_speed * (unit.agi * 0.01);
+            unit.Y_speed = unit.oY_speed + unit.oY_speed * (unit.agi * 0.01);
+        }
     }
 
     window.addEventListener("load", init, false);
@@ -117,14 +126,14 @@
         playerUnit.y = canvas.height / 2 - 18;
         playerUnit.agl = 0;
 
-        playerUnit.str = 30;
+        playerUnit.atk = 30;
         playerUnit.def = 500;
         playerUnit.maxHp = 100;
-        playerUnit.agi = 15;
+        playerUnit.agi = 0;
         playerUnit.lv = 1;
         playerUnit.exp = 100;
 
-        playerUnit.hp = 100;
+        playerUnit.hp = 50;
         playerUnit.mp = 0;
 
         pointer.x = playerUnit.x;
@@ -225,7 +234,7 @@
         var startAngle = 0; // Starting point on circle
         //var endAngle = Math.PI + (Math.PI * j) / 2; // End point on circle
         //var anticlockwise = i % 2 == 0 ? false : true; // clockwise or anticlockwis
-
+        setPlayerStatus(playerUnit, 'speed');
         drawUnit(playerUnit);
 
         for(unit of monsters){
@@ -254,24 +263,37 @@
 
             if(p.agl - allowDeg < agl && p.agl + allowDeg > agl && len < p.width * 2.0){
                 console.log('Attaked!');                 
-                unit.hp -= p.str;
-                if(unit.hp < 0){
+                unit.hp -= p.atk;
+                if(unit.hp <= 0){
                     if (i > -1) monsters.splice(i, 1)
-                    dropItem(unit.x, unit.X_speed)
+                    dropItem(unit.x, unit.y);
                 }
             }
         }
     }
 
+
     function dropItem(x, y){
         let min = Math.ceil(2);
         let max = Math.floor(14);
         
-        var item = Math.floor(Math.random() * (max - min)) + min; //최댓값은 제외, 최솟값은 포함
-        bufferCtx.drawImage(items[item], //Source Image
-                unit.x, unit.y, //View Position
-                unit.width, unit.height //View Size
+        var itemNum = Math.floor(Math.random() * (max - min)) + min; //최댓값은 제외, 최솟값은 포함
+        console.log(x, y, itemNum);
+        var item = {
+            x : x,
+            y : y,
+        }
+        droppedItems.push(item);
+    }
+
+    function drawDroppedItems(){
+        console.log(droppedItems);
+        for(item of droppedItems){
+            bufferCtx.drawImage(items[item], //Source Image
+                item.x, item.y, //View Position
+                canvas.width * 0.01, canvas.width * 0.01 //View Size
             );
+        }
     }
 
     function drawMainUI(){
@@ -331,8 +353,8 @@
         drawStatBox('#102020', '#726447', statBox);
         let list = [
                 {
-                    name: 'STR',
-                    value: playerUnit.str,
+                    name: 'ATK',
+                    value: playerUnit.atk,
                     color: '#EB5335'
                 },
                 {
