@@ -9,6 +9,10 @@
 </head>
 <link rel="stylesheet" href="game.css">
 <script src="src/ui.js"></script>
+<script src="src/input.js"></script>
+<script src="src/unit.js"></script>
+<script src="src/window.js"></script>
+
 <!-- <body onload="draw();"> -->
 <body style="margin: 0;">
     <canvas id="canvas">
@@ -32,7 +36,7 @@
 
     var droppedItems = [];
 
-    
+    var monsterRegenSpeed = 10 * 1000;     //Gap of Thread
     var ghostUnit = {}; //Player Unit Property
 
     var threadSpeed = 10;     //Gap of Thread
@@ -44,7 +48,6 @@
 
     var gameLoopThread;  //animation Thread ID
 
-
     let mainBox = {};
     let mainBar = {};
     let inven = {};
@@ -53,92 +56,7 @@
     let LVupBox = {};
     let invenBox = {};
 
-    window.onload = function(e) {
-        canvas = document.getElementById('canvas'); 
-        canvasBuffer = document.createElement("canvas");       
-        setCanvasSize();
-    }
-    
-    window.onresize = function(e) {
-        setCanvasSize();
-    }
-    
-    function setCanvasSize() {
-        const browserWidth = window.innerWidth;
-        const browserHeight = window.innerHeight-4;
-
-        if(browserWidth / browserHeight < 1.777) { //  width small
-            canvas.width = browserWidth;
-            canvas.height = browserWidth * 0.5625;
-        }
-        else{
-            canvas.width = browserHeight * 1.777;
-            canvas.height = browserHeight;
-        }
-        
-        canvasBuffer.width = canvas.width;
-        canvasBuffer.height = canvas.height;
-
-        setUIBoxes();
-
-        setUnitSize(playerUnit, 0.06, 0.106, 2.5);
-        setUnitSize(ghostUnit, 0.093, 0.166, 2.5);
-
-        canvasOldWidth = canvas.width;
-        canvasOldHeight = canvas.height;
-    }
-
-    function setUnitSize(unit, wd, hd, speed){
-        unit.width = canvas.width*wd;
-        unit.height = canvas.height*hd;
-            //width: 120,
-            //height: 160,
-        unit.oX_speed = canvas.width*0.0008*speed;
-        unit.oY_speed = canvas.height*0.0014*speed;
-
-        if(unit.x == undefined){
-            unit.x = canvas.width / 2 - unit.width / 2;
-            unit.y = canvas.height / 2 - unit.height / 2;
-        }
-        else{
-            unit.x = unit.x * (canvas.width / canvasOldWidth);
-            unit.y = unit.y * (canvas.height / canvasOldHeight);
-        }
-    }
-
-    function setUnitAngle(unit, x, y){
-        unit.agl = Math.atan2(x - (unit.x + unit.width/2) , (unit.y + unit.height/2) - y) * 180 / Math.PI;
-    }
-
-    function setPlayerStatus(unit, mode){
-        if(mode == 'speed'){
-            unit.X_speed = unit.oX_speed + unit.oX_speed * (unit.agi * 0.01);
-            unit.Y_speed = unit.oY_speed + unit.oY_speed * (unit.agi * 0.01);
-        }
-    }
-
     window.addEventListener("load", init, false);
-
-    document.addEventListener("mousemove", (e) => {
-        pointer.x = e.clientX;
-        pointer.y = e.clientY;
-        
-        setUnitAngle(playerUnit, pointer.x, pointer.y);
-    }, false);
-
-    document.addEventListener("click", (e)=>{
-        if(getMouseWhich(e.clientX, e.clientY) == 'game') attack();
-    }, false);
-
-    document.addEventListener("mousedown", (e)=>{
-        which = getMouseWhich(e.clientX, e.clientY);
-        if(which != 'game') moveInven(which, e.clientX, e.clientY, 'down');
-    }, false);
-
-    document.addEventListener("mouseup", (e)=>{
-        which = getMouseWhich(e.clientX, e.clientY);
-        if(which != 'game') moveInven(which, e.clientX, e.clientY, 'up');
-    }, false);
 
     function getMouseWhich(x, y){
         const mArea = {
@@ -200,6 +118,8 @@
 
         gameLoopThread = setInterval(gameLoop, threadSpeed);
 
+        monsterRegenThread = setInterval(genMonster, monsterRegenSpeed);
+
         monsters.push(ghostUnit);
 
         for(let i=0; i<13; i++){
@@ -207,55 +127,6 @@
             inventory[i].id = undefined;
             inventory[i].clicked = false;
         }
-    }
-
-    function setImage(){
-        character = new Image();
-        character.src = "char.png";
-
-        ghost = new Image();
-        ghost.src = "ghost.png";
-
-        asphalt = new Image();
-        asphalt.src = "asphalt.jpg";
-
-        for(let i=2; i<14; i++){
-            items[i] = new Image();
-            items[i].src = `itemImg/${i}.png`;
-        }
-        //console.log(ghost);
-    }
-
-    function getKeyDown(event){
-        var keyValue;
-        if(event == null) return;
-        else {
-            keyValue=event.keyCode;
-            event.preventDefault();
-        }
-        if(keyValue == "87") keyValue = "38";       //up
-        else if(keyValue == "83") keyValue = "40";  //down
-        else if(keyValue == "65") keyValue = "37";  //left
-        else if(keyValue == "68") keyValue = "39";  //right
-        keyPressOn[keyValue] = true;
-    }
-
-    function getKeyUp(event){
-        var keyValue;
-        if(event == null){
-            keyValue = window.event.keyCode;
-            window.event.preventDefault();
-        }
-        else{
-            keyValue=event.keyCode;
-            event.preventDefault();
-        }
-        if(keyValue == "87") keyValue = "38";       //up
-        else if(keyValue == "83") keyValue = "40";  //down
-        else if(keyValue == "65") keyValue = "37";  //left
-        else if(keyValue == "68") keyValue = "39";  //right
-        
-        keyPressOn[keyValue] = false;
     }
 
     function gameLoop(){  
@@ -311,140 +182,7 @@
         canvasCtx.drawImage(canvasBuffer, 0, 0);
     }
 
-    function attack(){
-        var p  = playerUnit;
-        var allowDeg = 15;
-
-        //console.log('clicked');
-        //monsters.pop()
-        //console.log(monsters);
-        for(let i=0; i<monsters.length; i++){
-            var unit = monsters[i];
-
-            var agl = Math.atan2((unit.x + unit.width/2) - (p.x + p.width/2), (p.y + p.height/2) - (unit.y + unit.height/2)) * 180 / Math.PI;
-            var len = Math.hypot((p.y + p.height/2) - (unit.y + unit.height/2), (unit.x + unit.width/2) - (p.x + p.width/2));
-
-
-            if(p.agl - allowDeg < agl && p.agl + allowDeg > agl && len < p.width * 2.0){
-                //console.log('Attaked!');                 
-                unit.hp -= p.atk;
-                if(unit.hp <= 0){
-                    //console.log('Dead!');                 
-                    if (i > -1) monsters.splice(i, 1)
-                    playerUnit.exp += 2;
-                    dropItem(unit.x, unit.y);
-                }
-            }
-        }
-    }
-
-    function moveInven(which, x, y, flg){
-        console.log(which);
-        if(flg == 'down'){
-            for(let i=0; i<13; i++){
-                inventory[i].clicked = false;
-            }
-            if(which == 'inven'){
-                let idx;
-                const box = {
-                    dy : canvas.height - mainBox.height + mainBox.height * 0.47 - inven.len,
-                    uy : canvas.height - mainBox.height + mainBox.height * 0.47
-                }
-                console.log(y, box.dy, box.uy);
-                if(box.dy <= y && box.uy >= y){
-                    const base = (canvas.width - mainBox.width) / 2 + (mainBox.width - inven.len)/2;
-                    for(idx=0; idx<9; idx++){
-                        box.dx = base + (inven.len*1.2 + inven.lineWidth) * (idx-4);
-                        box.ux = base + (inven.len*1.2 + inven.lineWidth) * (idx-4) + inven.len;
-                        //console.log(x, box.dx, box.ux);
-                        if(box.dx < x && box.ux > x){
-                            console.log(idx);
-                            break;
-                        }
-                    }
-                    
-                    inventory[idx].clicked = true;                
-                } 
-            }
-        }
-        else if(flg == 'up'){
-            
-            if(which == 'inven'){
-                let idx;
-                const box = {
-                    dy : canvas.height - mainBox.height + mainBox.height * 0.47 - inven.len,
-                    uy : canvas.height - mainBox.height + mainBox.height * 0.47
-                }
-                console.log(y, box.dy, box.uy);
-                if(box.dy <= y && box.uy >= y){
-                    const base = (canvas.width - mainBox.width) / 2 + (mainBox.width - inven.len)/2;
-                    for(idx=0; idx<9; idx++){
-                        box.dx = base + (inven.len*1.2 + inven.lineWidth) * (idx-4);
-                        box.ux = base + (inven.len*1.2 + inven.lineWidth) * (idx-4) + inven.len;
-                        //console.log(x, box.dx, box.ux);
-                        if(box.dx < x && box.ux > x){
-                            console.log(idx);
-                            break;
-                        }
-                    }
-                    
-                    var origin = inventory.findIndex(obj=>obj.clicked==true);
-
-                    var temp = inventory[origin];
-                    
-                    inventory[origin] = inventory[idx];
-                    inventory[idx] = temp;
-                    console.log(inventory[idx], inventory[origin]);
-                    inventory[idx].clicked = false;
-                } 
-            }
-            // for(let i=0; i<13; i++){
-            //     inventory[i].clicked = undefined;
-                    
-            // }
-        }
-    }
-
-    function dropItem(x, y){
-        let min = Math.ceil(2);
-        let max = Math.floor(14);
-        
-        var itemNum = Math.floor(Math.random() * (max - min)) + min; //최댓값은 제외, 최솟값은 포함
-
-        //console.log(x, y, itemNum);
-        var item = {
-            itemId : itemNum,
-            x : x,
-            y : y,
-            len : canvas.width * 0.07
-        }
-        droppedItems.push(item);
-    }
-
-    function drawDroppedItems(){
-        //console.log(droppedItems);
-        for(item of droppedItems){
-            bufferCtx.drawImage(items[item.itemId], //Source Image
-                item.x, item.y, //View Position
-                item.len, item.len //View Size
-            );
-        }
-    }
-
-    function checkGetItem(unit, item, idx){
-        if(unit.x < item.x + item.len * 0.5 && unit.x + unit.width > item.x + item.len * 0.5 && 
-           unit.y < item.y + item.len * 0.5 && unit.y + unit.height > item.y + item.len * 0.5){
-            var emptyIdx = inventory.findIndex(obj=>obj.id == undefined);
-            if(emptyIdx < 9){
-                inventory[emptyIdx].id = item.itemId;
-            }
-            
-            droppedItems.splice(idx, 1);
-        }
-    }
-
     function drawMainUI(){
-        
         let list = [
             {
                 name: 'ATK',
@@ -501,8 +239,8 @@
             drawEquipment('#151D1B','#726447', inven, invenBox, i, null);
         }
 
-        for(let i=0; i<9; i++){
-            drawInvenItem('#151D1B','#726447', inven, mainBox, i, inventory[i]);    
+        for(let i=0; i<14; i++){
+            drawInvenItem(inven, mainBox, inven, invenBox, i, inventory[i]);    
         }
     }
 

@@ -1,47 +1,30 @@
-function setUIBoxes(){
-    mainBox = {
-        width : canvas.width * 0.34,
-        height : canvas.height * 0.12,
-        radius : canvas.width * 0.01,
-        lineWidth : canvas.width * 0.008
-    };
-    mainBar = {
-        width : mainBox.width * 0.93,
-        height : mainBox.height * 0.1,
-        radius : mainBox.radius * 0.1,
-        lineWidth : mainBox.lineWidth * 0.4
-    };
-    inven = {
-        len : mainBox.width * 0.07,
-        radius : mainBox.radius * 0.1,
-        lineWidth : mainBox.lineWidth * 0.6 
-    };
 
-    statBox = {
-        width : canvas.width * 0.2,
-        height : canvas.height * 0.12,
-        radius : canvas.width * 0.01,
-        lineWidth : canvas.width * 0.008
-    }
-    statBar = {
-        width : statBox.width * 0.4,
-        height : statBox.height * 0.25,
-        radius : statBox.radius * 0.1,
-        lineWidth : 0
-    };
-    LVupBox = {  
-        width : statBox.width ,
-        height : statBox.height * 0.5,
-        radius : canvas.width * 0.01,
-        lineWidth : canvas.width * 0.008
-    }
 
-    invenBox = {
-        width : canvas.width * 0.2,
-        height : canvas.height * 0.18,
-        radius : canvas.width * 0.01,
-        lineWidth : canvas.width * 0.008
-    };
+function setImage(){
+    character = new Image();
+    character.src = "char.png";
+
+    ghost = new Image();
+    ghost.src = "ghost.png";
+
+    asphalt = new Image();
+    asphalt.src = "asphalt.jpg";
+
+    for(let i=2; i<14; i++){
+        items[i] = new Image();
+        items[i].src = `itemImg/${i}.png`;
+    }
+    //console.log(ghost);
+}
+
+function drawDroppedItems(){
+    //console.log(droppedItems);
+    for(item of droppedItems){
+        bufferCtx.drawImage(items[item.itemId], //Source Image
+            item.x, item.y, //View Position
+            item.len, item.len //View Size
+        );
+    }
 }
 
 function drawMonsterHPBar(emptyfill, fill, line, info){
@@ -158,10 +141,7 @@ function drawEquipment(fill, line, info, pInfo, idx, img){
     
     bufferCtx.fillStyle = fill;  
     bufferCtx.fill();
-    
-    if(img != null){
-        bufferCtx.drawImage(img, 0, 0, info.len, info.len);
-    }
+  
 
     bufferCtx.translate(-move1.x, -move1.y);
     bufferCtx.translate(-move2.x, -move2.y);
@@ -328,35 +308,68 @@ function drawInven(fill, line, info, pInfo, idx){
     
 }
 
-function drawInvenItem(fill, line, info, pInfo, idx, item){
-    const move1 = {
-        x : (canvas.width - pInfo.width)/2,
-        y : canvas.height - pInfo.height
-    };
-    const move2 = {
-        x : (((pInfo.width - info.len)/2) - ((info.len + info.lineWidth + info.len * 0.2) * (4-idx))),
-        y : (pInfo.height * 0.47 - info.len)
-    };
+function drawInvenItem(info1, pInfo1, info2, pInfo2, idx, item){
+    if(idx < 9){
+        const move1 = {
+            x : (canvas.width - pInfo1.width)/2,
+            y : canvas.height - pInfo1.height
+        };
+        const move2 = {
+            x : (((pInfo1.width - info1.len)/2) - ((info1.len + info1.lineWidth + info1.len * 0.2) * (4-idx))),
+            y : (pInfo1.height * 0.47 - info1.len)
+        };
 
-    if(item != undefined){
-        //console.log(item);
-        //bufferCtx.fillStyle = '#333';  
-        //bufferCtx.fill();
-        if(item.id == undefined){
+        if(item != undefined){
+            //console.log(item);
+            //bufferCtx.fillStyle = '#333';  
+            //bufferCtx.fill();
+            if(item.id == undefined){
 
+            }
+            else if(item.clicked != true){
+                bufferCtx.translate(move1.x, move1.y);
+                bufferCtx.translate(move2.x, move2.y);
+                bufferCtx.drawImage(items[item.id], 0, 0, info1.len, info1.len);
+                bufferCtx.translate(-move1.x, -move1.y);
+                bufferCtx.translate(-move2.x, -move2.y);
+            }
+            else{
+                bufferCtx.drawImage(items[item.id], pointer.x - inven.len/2, pointer.y - inven.len/2, info1.len, info1.len);
+            }
+            
         }
-        else if(item.clicked != true){
-            bufferCtx.translate(move1.x, move1.y);
-            bufferCtx.translate(move2.x, move2.y);
-            bufferCtx.drawImage(items[item.id], 0, 0, info.len, info.len);
-            bufferCtx.translate(-move1.x, -move1.y);
-            bufferCtx.translate(-move2.x, -move2.y);
-        }
-        else{
-            bufferCtx.drawImage(items[item.id], pointer.x - inven.len/2, pointer.y - inven.len/2, info.len, info.len);
-        }
-        
     }
+    else if(idx < 14){
+        const move1 = {
+            x : canvas.width - pInfo2.width,
+            y : canvas.height - pInfo2.height
+        };
+        const move2 = {
+            x : (((pInfo2.width - info2.len)/2) - ((info2.len + info2.lineWidth + info2.len * 0.6) * (1.5-(idx-9)))),
+            y : (pInfo2.height * 0.4 - info2.len)
+        };
+
+        if(item != undefined){
+            //console.log(item);
+            //bufferCtx.fillStyle = '#333';  
+            //bufferCtx.fill();
+            if(item.id == undefined){
+
+            }
+            else if(item.clicked != true){
+                bufferCtx.translate(move1.x, move1.y);
+                bufferCtx.translate(move2.x, move2.y);
+                bufferCtx.drawImage(items[item.id], 0, 0, info2.len, info2.len);
+                bufferCtx.translate(-move1.x, -move1.y);
+                bufferCtx.translate(-move2.x, -move2.y);
+            }
+            else{
+                bufferCtx.drawImage(items[item.id], pointer.x - inven.len/2, pointer.y - inven.len/2, info2.len, info2.len);
+            }
+            
+        }
+    }
+    
 }
 
 function drawMainBox(fill, line, info){
