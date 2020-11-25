@@ -23,13 +23,7 @@
     var canvasOldWidth;
     var canvasOldHeight;
 
-    var monsters = [];
-
     var playerUnit = {}; //Player Unit Property
-    var pointer = {};
-    var inventory = [];
-
-    
     var ghostUnit = {}; //Player Unit Property
 
     var threadSpeed = 10;     //Gap of Thread
@@ -37,7 +31,6 @@
 
     var character;
     var asphalt;
-    var items = [];
 
     var gameLoopThread;  //animation Thread ID
 
@@ -67,14 +60,14 @@
         canvasBuffer.width = canvas.width;
         canvasBuffer.height = canvas.height;
 
-        setUnitSize(playerUnit, 0.06, 0.106, 5);
-        setUnitSize(ghostUnit, 0.093, 0.166, 5);
+        setUnitSize(playerUnit, 0.093, 0.222, 5);
+        setUnitSize(ghostUnit, 0.093, 0.166), 5;
 
         canvasOldWidth = canvas.width;
         canvasOldHeight = canvas.height;
     }
 
-    function setUnitSize(unit, wd, hd, speed){
+    const setUnitSize = (unit, wd, hd, speed) => {
         unit.width = canvas.width*wd;
         unit.height = canvas.height*hd;
             //width: 120,
@@ -92,20 +85,8 @@
         }
     }
 
-    function setUnitAngle(unit, x, y){
-        unit.agl = Math.atan2(x - (unit.x + unit.width/2) , (unit.y + unit.height/2) - y) * 180 / Math.PI;
-    }
 
     window.addEventListener("load", init, false);
-
-    document.addEventListener("mousemove", function (e){
-        pointer.x = e. clientX;
-        pointer.y = e. clientY;
-        
-        setUnitAngle(playerUnit, pointer.x, pointer.y);
-    }, false);
-
-    document.addEventListener("click", attack, false);
 
     function init(){
         //canvas = document.getElementById("canvas");
@@ -115,25 +96,9 @@
 
         playerUnit.x = canvas.width / 2 - 18;
         playerUnit.y = canvas.height / 2 - 18;
-        playerUnit.agl = 0;
-
-        playerUnit.str = 30;
-        playerUnit.def = 500;
-        playerUnit.maxHp = 100;
-        playerUnit.agi = 15;
-        playerUnit.lv = 1;
-        playerUnit.exp = 100;
-
-        playerUnit.hp = 100;
-        playerUnit.mp = 0;
-
-        pointer.x = playerUnit.x;
-        pointer.y = playerUnit.y;
 
         ghostUnit.x = canvas.width / 2 - 18;
         ghostUnit.y = canvas.height / 2 - 18;
-        ghostUnit.maxHp = 100;
-        ghostUnit.hp = 100;
 
         document.addEventListener("keydown", getKeyDown, false);
         document.addEventListener("keyup", getKeyUp, false);
@@ -141,8 +106,6 @@
         setImage();
 
         gameLoopThread = setInterval(gameLoop, threadSpeed);
-
-        monsters.push(ghostUnit);
     }
 
     function setImage(){
@@ -154,12 +117,6 @@
 
         asphalt = new Image();
         asphalt.src = "asphalt.jpg";
-
-        for(let i=2; i<14; i++){
-            items[i] = new Image();
-            items[i].src = `${i}.png`;
-        }
-        //console.log(ghost);
     }
 
     function getKeyDown(event){
@@ -197,81 +154,34 @@
         calcKeyInnput();
         displayAll();
     }
-
+    
     function calcKeyInnput(){
-        let agl = null;
-        let changed = false;
-        if(keyPressOn["38"] && playerUnit.y >= -playerUnit.height/2){
+        if(keyPressOn["38"] && playerUnit.y >= -playerUnit.height/2)
             playerUnit.y -= playerUnit.Y_speed;  //up
-        }
-        if(keyPressOn["40"] && playerUnit.y <= canvas.height -playerUnit.height/2){
+        if(keyPressOn["40"] && playerUnit.y <= canvas.height -playerUnit.height/2)
             playerUnit.y += playerUnit.Y_speed;  //down
-        }
-        if(keyPressOn["37"] && playerUnit.x >= -playerUnit.width/2){
+        if(keyPressOn["37"] && playerUnit.x >= -playerUnit.width/2)
             playerUnit.x -= playerUnit.X_speed;  //left
-        }
-        if(keyPressOn["39"] && playerUnit.x <= canvas.width -playerUnit.width/2){
+        if(keyPressOn["39"] && playerUnit.x <= canvas.width -playerUnit.width/2)
             playerUnit.x += playerUnit.X_speed;  //right
-        }
-
-        setUnitAngle(playerUnit, pointer.x, pointer.y);
-        //if(agl != null) playerUnit.agl = agl;
     }
 
     function displayAll(){
-        drawRoad();
-        
-        bufferCtx.beginPath();
-        var startAngle = 0; // Starting point on circle
-        //var endAngle = Math.PI + (Math.PI * j) / 2; // End point on circle
-        //var anticlockwise = i % 2 == 0 ? false : true; // clockwise or anticlockwis
+        drawHome();
 
-        drawUnit(playerUnit);
+        bufferCtx.drawImage(character, //Source Image
+            playerUnit.x, playerUnit.y, //View Position
+            playerUnit.width, playerUnit.height //View Size
+        );
 
-        for(unit of monsters){
-            drawUnit(unit, ghost);
-            drawMonsterHPBar('#050D0B', '#BC252A', '#726447', unit);
-        }
+        bufferCtx.drawImage(ghost, //Source Image
+            ghostUnit.x, ghostUnit.y, //View Position
+            ghostUnit.width, ghostUnit.height //View Size
+        );
 
         drawMainUI();
         
         canvasCtx.drawImage(canvasBuffer, 0, 0);
-    }
-
-    function attack(){
-        var p  = playerUnit;
-        var allowDeg = 15;
-
-        console.log('clicked');
-        //monsters.pop()
-        console.log(monsters);
-        for(let i=0; i<monsters.length; i++){
-            var unit = monsters[i];
-
-            var agl = Math.atan2((unit.x + unit.width/2) - (p.x + p.width/2), (p.y + p.height/2) - (unit.y + unit.height/2)) * 180 / Math.PI;
-            var len = Math.hypot((p.y + p.height/2) - (unit.y + unit.height/2), (unit.x + unit.width/2) - (p.x + p.width/2));
-
-
-            if(p.agl - allowDeg < agl && p.agl + allowDeg > agl && len < p.width * 2.0){
-                console.log('Attaked!');                 
-                unit.hp -= p.str;
-                if(unit.hp < 0){
-                    if (i > -1) monsters.splice(i, 1)
-                    dropItem(unit.x, unit.X_speed)
-                }
-            }
-        }
-    }
-
-    function dropItem(x, y){
-        let min = Math.ceil(2);
-        let max = Math.floor(14);
-        
-        var item = Math.floor(Math.random() * (max - min)) + min; //최댓값은 제외, 최솟값은 포함
-        bufferCtx.drawImage(items[item], //Source Image
-                unit.x, unit.y, //View Position
-                unit.width, unit.height //View Size
-            );
     }
 
     function drawMainUI(){
@@ -321,43 +231,43 @@
 
         drawMainBox('#102020', '#726447', mainBox);
         
-        drawMainBar('#050D0B', '#00B801', '#726447', mainBar, mainBox, 0.7, playerUnit.hp / playerUnit.maxHp * 100);
-        drawMainBar('#050D0B', '#2183F3', '#726447', mainBar, mainBox, 0.9, playerUnit.mp);
+        drawMainBar('#050D0B', '#00B801', '#726447', mainBar, mainBox, 0.7, 25);
+        drawMainBar('#050D0B', '#2183F3', '#726447', mainBar, mainBox, 0.9, 50);
 
         for(let i=0; i<9; i++){
-            drawInven('#151D1B','#726447', inven, mainBox, i, inventory[i]);    
+            drawInven('#050D0B','#726447', inven, mainBox, i, ghost);    
         }
 
         drawStatBox('#102020', '#726447', statBox);
         let list = [
                 {
                     name: 'STR',
-                    value: playerUnit.str,
+                    value: 3000,
                     color: '#EB5335'
                 },
                 {
                     name: 'DEF',
-                    value: playerUnit.def,
+                    value: 500,
                     color: '#8C8C8C'
                 },
                 {
                     name: 'H P',
-                    value: playerUnit.maxHp,
+                    value: 100,
                     color: '#70AD47'
                 },
                 {
                     name: 'AGI',
-                    value: playerUnit.agi,
+                    value: 15,
                     color: '#FFB801'
                 },
                 {
                     name: 'L V',
-                    value: playerUnit.lv,
+                    value: 1,
                     color: '#CDD121'
                 },
                 {
                     name: 'EXP',
-                    value: playerUnit.exp,
+                    value: 100000,
                     color: '#CDD121'
                 }
             ]
@@ -370,90 +280,7 @@
         drawInvenBox('#102020', '#726447', invenBox);
 
         for(let i=0; i<4; i++){
-            drawEquipment('#151D1B','#726447', inven, invenBox, i, null);
-        }
-    }
-
-    function drawMonsterHPBar(emptyfill, fill, line, info){
-        const move1 = {
-            x : info.x,
-            y : info.y - canvas.height*0.005
-        }
-        const value = info.hp / info.maxHp * 100;
-        const height = info.height*0.06;
-        const lineWidth = height * 0.7 
-        const radius = canvas.width * 0.001;
-        console.log(value);
-
-        bufferCtx.translate(move1.x, move1.y);
-        //bufferCtx.translate( (pInfo.width - info.width)/2 , (pInfo.height * height - info.height));
-
-        bufferCtx.beginPath();
-        bufferCtx.moveTo(0, radius);
-        bufferCtx.quadraticCurveTo(0, 0, radius, 0);
-        bufferCtx.lineTo(info.width - radius, 0);
-        bufferCtx.quadraticCurveTo(info.width, 0, info.width, radius);
-        bufferCtx.lineTo(info.width, height-radius);
-        bufferCtx.quadraticCurveTo(info.width, height, info.width - radius, height);
-        bufferCtx.lineTo(radius, height);
-        bufferCtx.quadraticCurveTo(0, height, 0, height-radius);
-        bufferCtx.lineTo(0, radius);
-
-        bufferCtx.strokeStyle = line;        // set the color for the circle to 'green'
-        bufferCtx.lineWidth = lineWidth;  
-        bufferCtx.stroke();
-        bufferCtx.fillStyle = emptyfill;  
-        bufferCtx.fill();
-
-        
-        bufferCtx.beginPath();
-        bufferCtx.moveTo(0, radius);
-        bufferCtx.quadraticCurveTo(0, 0, radius, 0);
-        bufferCtx.lineTo(info.width*value*0.01 - radius, 0);
-        bufferCtx.quadraticCurveTo(info.width*value*0.01, 0, info.width*value*0.01, radius);
-        bufferCtx.lineTo(info.width*value*0.01, height-radius);
-        bufferCtx.quadraticCurveTo(info.width*value*0.01, height, info.width*value*0.01 - radius, height);
-        bufferCtx.lineTo(radius, height);
-        bufferCtx.quadraticCurveTo(0, height, 0, height-radius);
-        bufferCtx.lineTo(0, info.radius);
-
-        bufferCtx.fillStyle = fill;  
-        bufferCtx.fill();
-
-        bufferCtx.translate(-move1.x, -move1.y);
-    }
-
-    function drawUnit(unit, img = undefined){
-        if(img == undefined){
-            bufferCtx.arc(unit.x + unit.width / 2, unit.y + unit.height / 2, unit.width / 2, 0, (Math.PI/180)*360, 1);
-            bufferCtx.fillStyle = '#F8C574';
-            bufferCtx.strokeStyle = '#352C17'
-
-            bufferCtx.fill();
-            let move1 = {
-                x : unit.x + unit.width / 2,
-                y : unit.y + unit.width / 2
-            };
-
-            bufferCtx.translate(move1.x, move1.y);
-            bufferCtx.rotate((Math.PI/180)*unit.agl);
-            bufferCtx.beginPath();
-            bufferCtx.arc(-unit.width / 2.5, -unit.width / 2, unit.width * 0.2, 0,(Math.PI/180)*360, 1);
-            bufferCtx.fill()
-            bufferCtx.stroke();
-            bufferCtx.beginPath();
-            bufferCtx.arc( unit.width / 2.5, -unit.width / 2, unit.width * 0.2, 0,(Math.PI/180)*360, 1);
-            bufferCtx.fill();
-            bufferCtx.stroke();
-
-            bufferCtx.rotate((Math.PI/180)*-unit.agl);
-            bufferCtx.translate(-move1.x, -move1.y);
-        }
-        else{
-            bufferCtx.drawImage(img, //Source Image
-                unit.x, unit.y, //View Position
-                unit.width, unit.height //View Size
-            );
+            drawEquipment('#050D0B','#726447', inven, invenBox, i, null);
         }
     }
 
@@ -620,13 +447,13 @@
         bufferCtx.translate(-move1.x, -move1.y);
     }
 
-    function drawInven(fill, line, info, pInfo, idx, img = null){
+    function drawInven(fill, line, info, pInfo, idx, img){
         const move1 = {
             x : (canvas.width - pInfo.width)/2,
             y : canvas.height - pInfo.height
         };
         const move2 = {
-            x : (((pInfo.width - info.len)/2) - ((info.len + info.lineWidth + info.len * 0.2) * (4-idx))),
+            x : (((pInfo.width - info.len)/2) - ((info.len + info.lineWidth + info.len * 0.2) * (idx-4))),
             y : (pInfo.height * 0.47 - info.len)
         };
 
@@ -650,15 +477,9 @@
         
         bufferCtx.fillStyle = fill;  
         bufferCtx.fill();
-
-        if(img != null && img != undefined){
-            //bufferCtx.fillStyle = '#333';  
-            //bufferCtx.fill();
+        
+        if(img != null){
             bufferCtx.drawImage(img, 0, 0, info.len, info.len);
-        }
-        else{
-            //bufferCtx.fillStyle = fill;  
-            //bufferCtx.fill();
         }
 
         bufferCtx.translate(-move1.x, -move1.y);
@@ -666,12 +487,7 @@
     }
 
     function drawMainBox(fill, line, info){
-        const move1 = {
-            x : (canvas.width - info.width)/2,
-            y : canvas.height - info.height
-        };
-
-        bufferCtx.translate(move1.x, move1.y);
+        bufferCtx.translate( (canvas.width - info.width)/2 ,canvas.height - info.height);
         
         bufferCtx.beginPath();
         bufferCtx.moveTo(0, info.radius);
@@ -688,21 +504,12 @@
         bufferCtx.fillStyle = fill;  
         bufferCtx.fill();
         
-        bufferCtx.translate( -move1.x, -move1.y);
+        bufferCtx.translate( -(canvas.width - info.width)/2 , -canvas.height + info.height);
     }
 
     function drawMainBar(emptyfill, fill, line, info, pInfo, height, value){
-        const move1 = {
-            x : (canvas.width - pInfo.width)/2,
-            y : canvas.height - pInfo.height
-        };
-        const move2 = {
-            x : (pInfo.width - info.width)/2,
-            y : (pInfo.height * height - info.height)
-        };
-
-        bufferCtx.translate(move1.x, move1.y);
-        bufferCtx.translate(move2.x, move2.y);
+        bufferCtx.translate( (canvas.width - pInfo.width)/2 ,canvas.height - pInfo.height);
+        bufferCtx.translate( (pInfo.width - info.width)/2 , (pInfo.height * height - info.height));
 
         bufferCtx.beginPath();
         bufferCtx.moveTo(0, info.radius);
@@ -742,11 +549,11 @@
         bufferCtx.fillStyle = fill;  
         bufferCtx.fill();
 
-        bufferCtx.translate(-move1.x, -move1.y);
-        bufferCtx.translate(-move2.x, -move2.y);
+        bufferCtx.translate( - (pInfo.width - info.width)/2 , - (pInfo.height * height - info.height));
+        bufferCtx.translate( -(canvas.width - pInfo.width)/2 , -canvas.height + pInfo.height);
     }
 
-    function drawRoad(){
+    function drawHome(){
         var width = canvas.width;
         var height = canvas.height;
         bufferCtx.drawImage(asphalt, 0, 0, width, height);
