@@ -24,6 +24,7 @@
     var canvasOldHeight;
 
     var playerUnit = {}; //Player Unit Property
+    var pointer = {};
     var ghostUnit = {}; //Player Unit Property
 
     var threadSpeed = 10;     //Gap of Thread
@@ -60,14 +61,14 @@
         canvasBuffer.width = canvas.width;
         canvasBuffer.height = canvas.height;
 
-        setUnitSize(playerUnit, 0.093, 0.222, 5);
+        setUnitSize(playerUnit, 0.093, 0.093, 5);
         setUnitSize(ghostUnit, 0.093, 0.166), 5;
 
         canvasOldWidth = canvas.width;
         canvasOldHeight = canvas.height;
     }
 
-    const setUnitSize = (unit, wd, hd, speed) => {
+    function setUnitSize(unit, wd, hd, speed){
         unit.width = canvas.width*wd;
         unit.height = canvas.height*hd;
             //width: 120,
@@ -85,8 +86,21 @@
         }
     }
 
+    function setUnitAngle(unit, x, y){
+        unit.agl = Math.atan2(x - (unit.x + unit.width/2) , (unit.y + unit.height/2) - y) * 180 / Math.PI;
+    }
 
     window.addEventListener("load", init, false);
+
+    document.addEventListener("mousemove", function (e){
+        // var loc = windowToCanvas(canvasBuffer, e.clientX, e.clientY);
+        // playerUnit.agl = Math.atan2(loc.y-playerUnit.y, loc.x-playerUnit.x) * 180 / Math.PI;
+        pointer.x = e. clientX;
+        pointer.y = e. clientY;
+        
+        setUnitAngle(playerUnit, pointer.x, pointer.y);
+        //console.log(playerUnit.agl);
+    },false);
 
     function init(){
         //canvas = document.getElementById("canvas");
@@ -96,6 +110,10 @@
 
         playerUnit.x = canvas.width / 2 - 18;
         playerUnit.y = canvas.height / 2 - 18;
+        playerUnit.agl = 0;
+
+        pointer.x = playerUnit.x;
+        pointer.y = playerUnit.y;
 
         ghostUnit.x = canvas.width / 2 - 18;
         ghostUnit.y = canvas.height / 2 - 18;
@@ -155,24 +173,58 @@
         displayAll();
     }
     
+    let oldAgl;
     function calcKeyInnput(){
-        if(keyPressOn["38"] && playerUnit.y >= -playerUnit.height/2)
+        let agl = null;
+        let changed = false;
+        if(keyPressOn["38"] && playerUnit.y >= -playerUnit.height/2){
             playerUnit.y -= playerUnit.Y_speed;  //up
-        if(keyPressOn["40"] && playerUnit.y <= canvas.height -playerUnit.height/2)
+        }
+        if(keyPressOn["40"] && playerUnit.y <= canvas.height -playerUnit.height/2){
             playerUnit.y += playerUnit.Y_speed;  //down
-        if(keyPressOn["37"] && playerUnit.x >= -playerUnit.width/2)
+        }
+        if(keyPressOn["37"] && playerUnit.x >= -playerUnit.width/2){
             playerUnit.x -= playerUnit.X_speed;  //left
-        if(keyPressOn["39"] && playerUnit.x <= canvas.width -playerUnit.width/2)
+        }
+        if(keyPressOn["39"] && playerUnit.x <= canvas.width -playerUnit.width/2){
             playerUnit.x += playerUnit.X_speed;  //right
+        }
+
+        setUnitAngle(playerUnit, pointer.x, pointer.y);
+        //if(agl != null) playerUnit.agl = agl;
     }
 
     function displayAll(){
         drawRoad();
+        
+        bufferCtx.beginPath();
+        var startAngle = 0; // Starting point on circle
+        //var endAngle = Math.PI + (Math.PI * j) / 2; // End point on circle
+        //var anticlockwise = i % 2 == 0 ? false : true; // clockwise or anticlockwise
 
-        bufferCtx.drawImage(character, //Source Image
-            playerUnit.x, playerUnit.y, //View Position
-            playerUnit.width, playerUnit.height //View Size
-        );
+        bufferCtx.arc(playerUnit.x + playerUnit.width / 2, playerUnit.y + playerUnit.width / 2, playerUnit.width / 2, 0,(Math.PI/180)*360, 1);
+        bufferCtx.fill();
+        let move1 = {
+            x : playerUnit.x + playerUnit.width / 2,
+            y : playerUnit.y + playerUnit.width / 2
+        };
+
+        bufferCtx.translate(move1.x, move1.y);
+        bufferCtx.rotate((Math.PI/180)*playerUnit.agl);
+        bufferCtx.beginPath();
+        bufferCtx.arc(-playerUnit.width / 2, -playerUnit.width / 2, playerUnit.width * 0.2, 0,(Math.PI/180)*360, 1);
+        bufferCtx.fill();
+        bufferCtx.beginPath();
+        bufferCtx.arc( playerUnit.width / 2, -playerUnit.width / 2, playerUnit.width * 0.2, 0,(Math.PI/180)*360, 1);
+        bufferCtx.fill();
+        bufferCtx.rotate((Math.PI/180)*-playerUnit.agl);
+        bufferCtx.translate(-move1.x, -move1.y);
+        
+
+        // bufferCtx.drawImage(character, //Source Image
+        //     playerUnit.x, playerUnit.y, //View Position
+        //     playerUnit.width, playerUnit.height //View Size
+        // );
 
         bufferCtx.drawImage(ghost, //Source Image
             ghostUnit.x, ghostUnit.y, //View Position
