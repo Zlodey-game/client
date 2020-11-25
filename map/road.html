@@ -215,14 +215,19 @@
             radius : statBox.radius * 0.1,
             lineWidth : 0
         };
-        let LVupBox = {
+        let LVupBox = {  
             width : statBox.width ,
             height : statBox.height * 0.5,
             radius : canvas.width * 0.01,
             lineWidth : canvas.width * 0.008
         }
 
-
+        let invenBox = {
+            width : canvas.width * 0.2,
+            height : canvas.height * 0.18,
+            radius : canvas.width * 0.01,
+            lineWidth : canvas.width * 0.008
+        };
 
         drawMainBox('#102020', '#726447', mainBox);
         
@@ -231,7 +236,6 @@
 
         for(let i=0; i<9; i++){
             drawInven('#050D0B','#726447', inven, mainBox, i, ghost);    
-
         }
 
         drawStatBox('#102020', '#726447', statBox);
@@ -273,147 +277,26 @@
 
         drawLVup('#102020', '#726447', LVupBox, statBox, 3);
 
-    }
+        drawInvenBox('#102020', '#726447', invenBox);
 
-    function drawLVup(fill, line, info, pInfo, num){
-        bufferCtx.translate( 0 ,canvas.height - info.height - info.lineWidth*0.5 - pInfo.height);
-        // bufferCtx.fillStyle = "#ffffff";  
-        // bufferCtx.fillRect (0, 0, box.width, box.height);
-        bufferCtx.beginPath();
-        bufferCtx.moveTo(0, 0);
-        //bufferCtx.quadraticCurveTo(0, 0, info.radius, 0);
-        bufferCtx.lineTo(info.width - info.radius, 0);
-        bufferCtx.quadraticCurveTo(info.width, 0, info.width, info.radius);
-
-        bufferCtx.lineTo(info.width, info.height);
-        //bufferCtx.lineTo(0, info.height);
-        bufferCtx.lineTo(info.width, info.height-info.radius);
-        bufferCtx.quadraticCurveTo(info.width, info.height, info.width - info.radius, info.height);
-        bufferCtx.lineTo(0, info.height);
-        //bufferCtx.quadraticCurveTo(0, box.height, 0, box.height-box.radius);
-        bufferCtx.lineTo(0, 0);
-        // bufferCtx.quadraticCurveTo(125, 25, 75, 25);
-        bufferCtx.strokeStyle = line;        // set the color for the circle to 'green'
-        bufferCtx.lineWidth = info.lineWidth;  
-        bufferCtx.stroke();
-        bufferCtx.fillStyle = fill;
-        bufferCtx.fill();
-
-        bufferCtx.fillStyle = "#e9e9e9";  
-        //bufferCtx.translate(info.width*0.1, (info.height - info.height*0.6)/2);
-        bufferCtx.font = `medium ${info.height*0.4}px Noto Sans KR`;
-        bufferCtx.fillText('남은 포인트', info.width*0.15, (info.height - info.height*0.25)/1.2);
-
-        bufferCtx.fillStyle = "#FFB801";  
-        bufferCtx.font = `bold ${info.height*0.45}px Noto Sans KR`;
-        bufferCtx.fillText(num, info.width*0.65, (info.height - info.height*0.21)/1.2);
-        //bufferCtx.translate(-info.width*0.1, -(info.height - info.height*0.6)/2);
-        
-        //bufferCtx.translate( -(canvas.width - info.width)/2 , -canvas.height + info.height);
-        bufferCtx.translate( 0 , -(canvas.height - info.height - info.lineWidth*0.5 - pInfo.height));
-    }
-
-    function drawStat(text, value, fill, info, pInfo, idx){
-        const Y_which = [-1, -1, 0, 0, 1, 1];
-        const X_which = [-(pInfo.width - info.width)*0.4, (pInfo.width - info.width)*0.4];
-        bufferCtx.translate( 0 , canvas.height - pInfo.height);
-
-        bufferCtx.translate( ((pInfo.width - info.width)/2 + X_which[idx%2]), ((((pInfo.height - pInfo.lineWidth) - info.height)/1.2) + ((info.height + info.lineWidth) * Y_which[idx] )));
-        //bufferCtx.translate( (pInfo.width - info.width)/2 , (((pInfo.height - info.height)/2) - (info.height + info.lineWidth + info.height * 0.8) * (idx-2)));
-        
-        bufferCtx.font = `bold ${info.height*0.7}px Noto Sans KR`;
-    
-        bufferCtx.fillStyle = fill;  
-
-        bufferCtx.fillText(text, 0, (info.height - info.height*0.8)/2);
-
-        bufferCtx.translate(info.width*0.35, 0);
-        bufferCtx.fillText(value, 0, (info.height - info.height*0.8)/2);
-        bufferCtx.translate(-info.width*0.35, 0);
-        
-        bufferCtx.translate( -((pInfo.width - info.width)/2 + X_which[idx%2]), -((((pInfo.height - pInfo.lineWidth) - info.height)/1.2) + ((info.height + info.lineWidth) * Y_which[idx] )));
-
-        
-        bufferCtx.translate( 0 , -canvas.height + pInfo.height);
-    }
-
-    function drawXpBar(emptyfill, fill, line, info, pInfo, idx, value){
-        bufferCtx.translate( 0 ,canvas.height - pInfo.height);
-        bufferCtx.translate( (pInfo.width - info.width)/2 , (((pInfo.height - info.height)/2) - (info.height + info.lineWidth + info.height * 0.8) * (idx-2)));
-
-        bufferCtx.beginPath();
-        bufferCtx.moveTo(0, info.radius);
-        bufferCtx.quadraticCurveTo(0, 0, info.radius, 0);
-        bufferCtx.lineTo(info.width - info.radius, 0);
-        bufferCtx.quadraticCurveTo(info.width, 0, info.width, info.radius);
-        bufferCtx.lineTo(info.width, info.height-info.radius);
-        bufferCtx.quadraticCurveTo(info.width, info.height, info.width - info.radius, info.height);
-        bufferCtx.lineTo(info.radius, info.height);
-        bufferCtx.quadraticCurveTo(0, info.height, 0, info.height-info.radius);
-        bufferCtx.lineTo(0, info.radius);
-
-        bufferCtx.strokeStyle = line;        // set the color for the circle to 'green'
-        bufferCtx.lineWidth = info.lineWidth;  
-        bufferCtx.stroke();
-        bufferCtx.fillStyle = emptyfill;  
-        bufferCtx.fill();
-
-        if(value != 0 || value != null){
-            if(value > 100) value = 100;
-            if(value < 0) value = 0;
-            bufferCtx.beginPath();
-            bufferCtx.moveTo(0, info.radius);
-            bufferCtx.quadraticCurveTo(0, 0, info.radius, 0);
-            bufferCtx.lineTo(info.width*value*0.01 - info.radius, 0);
-            bufferCtx.quadraticCurveTo(info.width*value*0.01, 0, info.width*value*0.01, info.radius);
-            bufferCtx.lineTo(info.width*value*0.01, info.height-info.radius);
-            bufferCtx.quadraticCurveTo(info.width*value*0.01, info.height, info.width*value*0.01 - info.radius, info.height);
-            bufferCtx.lineTo(info.radius, info.height);
-            bufferCtx.quadraticCurveTo(0, info.height, 0, info.height-info.radius);
-            bufferCtx.lineTo(0, info.radius);
-
-            bufferCtx.fillStyle = fill;  
-            bufferCtx.fill();
+        for(let i=0; i<4; i++){
+            drawEquipment('#050D0B','#726447', inven, invenBox, i, null);
         }
-
-        bufferCtx.translate( - (pInfo.width - info.width)/2 , -(((pInfo.height - info.height)/2) - (info.height + info.lineWidth + info.height * 0.8) * (idx-2)));
-        bufferCtx.translate( 0 , -canvas.height + pInfo.height);
     }
 
-    function drawStatBox(fill, line, info){
-        bufferCtx.translate( 0 ,canvas.height - info.height);
-        // bufferCtx.fillStyle = "#ffffff";  
-        // bufferCtx.fillRect (0, 0, box.width, box.height);
-        bufferCtx.beginPath();
-        bufferCtx.moveTo(0, 0);
-        //bufferCtx.quadraticCurveTo(0, 0, info.radius, 0);
-        bufferCtx.lineTo(info.width - info.radius, 0);
-        bufferCtx.quadraticCurveTo(info.width, 0, info.width, info.radius);
+    function drawEquipment(fill, line, info, pInfo, idx, img){
+        const move1 = {
+            x : canvas.width - pInfo.width,
+            y : canvas.height - pInfo.height
+        };
+        const move2 = {
+            x : (((pInfo.width - info.len)/2) - ((info.len + info.lineWidth + info.len * 0.6) * (idx-1.5))),
+            y : (pInfo.height * 0.4 - info.len)
+        };
 
-        bufferCtx.lineTo(info.width, info.height);
-        bufferCtx.lineTo(0, info.height);
-        //bufferCtx.lineTo(box.width, box.height-box.radius);
-        //bufferCtx.quadraticCurveTo(box.width, box.height, box.width - box.radius, box.height);
-        //bufferCtx.lineTo(box.radius, box.height);
-        //bufferCtx.quadraticCurveTo(0, box.height, 0, box.height-box.radius);
-        bufferCtx.lineTo(0, 0);
-        // bufferCtx.quadraticCurveTo(125, 25, 75, 25);
-        bufferCtx.strokeStyle = line;        // set the color for the circle to 'green'
-        bufferCtx.lineWidth = info.lineWidth;  
-        bufferCtx.stroke();
-        bufferCtx.fillStyle = fill;  
-        bufferCtx.fill();
-        
-        //bufferCtx.translate( -(canvas.width - info.width)/2 , -canvas.height + info.height);
-        bufferCtx.translate( -0 , -canvas.height + info.height);
-    }
+        bufferCtx.translate(move1.x, move1.y);
+        bufferCtx.translate(move2.x, move2.y);
 
-    function drawInven(fill, line, info, pInfo, idx, img){
-        bufferCtx.translate( (canvas.width - pInfo.width)/2 ,canvas.height - pInfo.height);
-        // bufferCtx.translate( (pInfo.width - info.len)/2 , (pInfo.height * 0.5 - info.len));
-        bufferCtx.translate( (((pInfo.width - info.len)/2) - ((info.len + info.lineWidth + info.len * 0.2) * (idx-4))), (pInfo.height * 0.47 - info.len));
-        // + (info.len + info.lineWidth + info.len * 0.1) * idx 
-        
         bufferCtx.beginPath();
         bufferCtx.moveTo(0, info.radius);
         bufferCtx.quadraticCurveTo(0, 0, info.radius, 0);
@@ -428,24 +311,121 @@
         bufferCtx.strokeStyle = line;        // set the color for the circle to 'green'
         bufferCtx.lineWidth = info.lineWidth;  
         bufferCtx.stroke();
-        //if(img == null || img == undefined){
-            bufferCtx.fillStyle = fill;  
-            bufferCtx.fill();
+        
+        bufferCtx.fillStyle = fill;  
+        bufferCtx.fill();
         
         if(img != null){
             bufferCtx.drawImage(img, 0, 0, info.len, info.len);
         }
-        bufferCtx.translate( -(((pInfo.width - info.len)/2) - ((info.len + info.lineWidth + info.len * 0.2) * (idx-4))), - (pInfo.height * 0.47 - info.len));
-        bufferCtx.translate( -(canvas.width - pInfo.width)/2 , -(canvas.height - pInfo.height));
+
+        bufferCtx.translate(-move1.x, -move1.y);
+        bufferCtx.translate(-move2.x, -move2.y);
     }
 
-    function drawMainBox(fill, line, info){
-        bufferCtx.translate( (canvas.width - info.width)/2 ,canvas.height - info.height);
+    function drawInvenBox(fill, line, info){
+        const move1 = {
+            x : canvas.width - info.width,
+            y : canvas.height - info.height
+        };
+
+        bufferCtx.translate(move1.x, move1.y);
         // bufferCtx.fillStyle = "#ffffff";  
         // bufferCtx.fillRect (0, 0, box.width, box.height);
         bufferCtx.beginPath();
         bufferCtx.moveTo(0, info.radius);
         bufferCtx.quadraticCurveTo(0, 0, info.radius, 0);
+        bufferCtx.lineTo(info.width, 0);
+        bufferCtx.lineTo(info.width, info.height);
+        bufferCtx.lineTo(0, info.height);
+        bufferCtx.lineTo(0, info.radius);
+        
+        bufferCtx.strokeStyle = line;        // set the color for the circle to 'green'
+        bufferCtx.lineWidth = info.lineWidth;  
+        bufferCtx.stroke();
+        bufferCtx.fillStyle = fill;  
+        bufferCtx.fill();
+        
+        //bufferCtx.translate( -(canvas.width - info.width)/2 , -canvas.height + info.height);
+        bufferCtx.translate(-move1.x, -move1.y);
+    }
+
+    function drawLVup(fill, line, info, pInfo, num){
+        const move1 = {
+            x : 0,
+            y : canvas.height - info.height - info.lineWidth*0.5 - pInfo.height
+        };
+
+        bufferCtx.translate(move1.x, move1.y);
+        
+        bufferCtx.beginPath();
+        bufferCtx.moveTo(0, 0);
+        bufferCtx.lineTo(info.width - info.radius, 0);
+        bufferCtx.quadraticCurveTo(info.width, 0, info.width, info.radius);
+
+        bufferCtx.lineTo(info.width, info.height);
+        bufferCtx.lineTo(info.width, info.height-info.radius);
+        bufferCtx.quadraticCurveTo(info.width, info.height, info.width - info.radius, info.height);
+        bufferCtx.lineTo(0, info.height);
+        bufferCtx.lineTo(0, 0);
+        
+        bufferCtx.strokeStyle = line;        // set the color for the circle to 'green'
+        bufferCtx.lineWidth = info.lineWidth;  
+        bufferCtx.stroke();
+        bufferCtx.fillStyle = fill;
+        bufferCtx.fill();
+
+        bufferCtx.fillStyle = "#e9e9e9";  
+        bufferCtx.font = `medium ${info.height*0.4}px Noto Sans KR`;
+        bufferCtx.fillText('남은 포인트', info.width*0.15, (info.height - info.height*0.25)/1.2);
+
+        bufferCtx.fillStyle = "#FFB801";  
+        bufferCtx.font = `bold ${info.height*0.45}px Noto Sans KR`;
+        bufferCtx.fillText(num, info.width*0.65, (info.height - info.height*0.21)/1.2);
+        
+        bufferCtx.translate(-move1.x, -move1.y);
+    }
+
+    function drawStat(text, value, fill, info, pInfo, idx){
+        const Y_which = [-1, -1, 0, 0, 1, 1];
+        const X_which = [-(pInfo.width - info.width)*0.4, (pInfo.width - info.width)*0.4];
+
+        const move1 = {
+            x : 0,
+            y : canvas.height - pInfo.height
+        };
+        const move2 = {
+            x : ((pInfo.width - info.width)/2 + X_which[idx%2]),
+            y : ((((pInfo.height - pInfo.lineWidth) - info.height)/1.2) + ((info.height + info.lineWidth) * Y_which[idx]))
+        };
+
+        bufferCtx.translate(move1.x, move1.y);
+        bufferCtx.translate(move2.x, move2.y);
+        
+        bufferCtx.font = `bold ${info.height*0.7}px Noto Sans KR`;
+        bufferCtx.fillStyle = fill;  
+        bufferCtx.fillText(text, 0, (info.height - info.height*0.8)/2);
+
+        bufferCtx.translate(info.width*0.35, 0);
+        bufferCtx.fillText(value, 0, (info.height - info.height*0.8)/2);
+        bufferCtx.translate(-info.width*0.35, 0);
+        
+        bufferCtx.translate(-move1.x, -move1.y);
+        bufferCtx.translate(-move2.x, -move2.y);
+    }
+
+    function drawStatBox(fill, line, info){
+        const move1 = {
+            x : 0,
+            y : canvas.height - info.height
+        };
+
+        bufferCtx.translate(move1.x, move1.y);
+        // bufferCtx.fillStyle = "#ffffff";  
+        // bufferCtx.fillRect (0, 0, box.width, box.height);
+        bufferCtx.beginPath();
+        bufferCtx.moveTo(0, 0);
+        //bufferCtx.quadraticCurveTo(0, 0, info.radius, 0);
         bufferCtx.lineTo(info.width - info.radius, 0);
         bufferCtx.quadraticCurveTo(info.width, 0, info.width, info.radius);
 
@@ -455,8 +435,69 @@
         //bufferCtx.quadraticCurveTo(box.width, box.height, box.width - box.radius, box.height);
         //bufferCtx.lineTo(box.radius, box.height);
         //bufferCtx.quadraticCurveTo(0, box.height, 0, box.height-box.radius);
-        bufferCtx.lineTo(0, info.radius);
+        bufferCtx.lineTo(0, 0);
         // bufferCtx.quadraticCurveTo(125, 25, 75, 25);
+        bufferCtx.strokeStyle = line;        // set the color for the circle to 'green'
+        bufferCtx.lineWidth = info.lineWidth;  
+        bufferCtx.stroke();
+        bufferCtx.fillStyle = fill;  
+        bufferCtx.fill();
+        
+        //bufferCtx.translate( -(canvas.width - info.width)/2 , -canvas.height + info.height);
+        bufferCtx.translate(-move1.x, -move1.y);
+    }
+
+    function drawInven(fill, line, info, pInfo, idx, img){
+        const move1 = {
+            x : (canvas.width - pInfo.width)/2,
+            y : canvas.height - pInfo.height
+        };
+        const move2 = {
+            x : (((pInfo.width - info.len)/2) - ((info.len + info.lineWidth + info.len * 0.2) * (idx-4))),
+            y : (pInfo.height * 0.47 - info.len)
+        };
+
+        bufferCtx.translate(move1.x, move1.y);
+        bufferCtx.translate(move2.x, move2.y);
+
+        bufferCtx.beginPath();
+        bufferCtx.moveTo(0, info.radius);
+        bufferCtx.quadraticCurveTo(0, 0, info.radius, 0);
+        bufferCtx.lineTo(info.len - info.radius, 0);
+        bufferCtx.quadraticCurveTo(info.len, 0, info.len, info.radius);
+        bufferCtx.lineTo(info.len, info.len-info.radius);
+        bufferCtx.quadraticCurveTo(info.len, info.len, info.len - info.radius, info.len);
+        bufferCtx.lineTo(info.radius, info.len);
+        bufferCtx.quadraticCurveTo(0, info.len, 0, info.len - info.radius);
+        bufferCtx.lineTo(0, info.radius);
+
+        bufferCtx.strokeStyle = line;        // set the color for the circle to 'green'
+        bufferCtx.lineWidth = info.lineWidth;  
+        bufferCtx.stroke();
+        
+        bufferCtx.fillStyle = fill;  
+        bufferCtx.fill();
+        
+        if(img != null){
+            bufferCtx.drawImage(img, 0, 0, info.len, info.len);
+        }
+
+        bufferCtx.translate(-move1.x, -move1.y);
+        bufferCtx.translate(-move2.x, -move2.y);
+    }
+
+    function drawMainBox(fill, line, info){
+        bufferCtx.translate( (canvas.width - info.width)/2 ,canvas.height - info.height);
+        
+        bufferCtx.beginPath();
+        bufferCtx.moveTo(0, info.radius);
+        bufferCtx.quadraticCurveTo(0, 0, info.radius, 0);
+        bufferCtx.lineTo(info.width - info.radius, 0);
+        bufferCtx.quadraticCurveTo(info.width, 0, info.width, info.radius);
+        bufferCtx.lineTo(info.width, info.height);
+        bufferCtx.lineTo(0, info.height);
+        bufferCtx.lineTo(0, info.radius);
+        
         bufferCtx.strokeStyle = line;        // set the color for the circle to 'green'
         bufferCtx.lineWidth = info.lineWidth;  
         bufferCtx.stroke();
