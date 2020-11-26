@@ -10,12 +10,12 @@ document.addEventListener("click", (e)=>{
 }, false);
 
 document.addEventListener("mousedown", (e)=>{
-    which = getMouseWhich(e.clientX, e.clientY);
+    const which = getMouseWhich(e.clientX, e.clientY);
     if(which != 'game') moveInven(which, e.clientX, e.clientY, 'down');
 }, false);
 
 document.addEventListener("mouseup", (e)=>{
-    which = getMouseWhich(e.clientX, e.clientY);
+    const which = getMouseWhich(e.clientX, e.clientY);
     if(inventory.findIndex(obj=>obj.clicked == true) != -1)
         moveInven(which, e.clientX, e.clientY, 'up');
 }, false);
@@ -66,6 +66,7 @@ function moveInven(which, x, y, flg){
         x_base : (inven.len*1.6 + inven.lineWidth)
     };
     let idx;
+    const availSlot = ['weapon', 'armor', 'pants', 'shoes'];
 
     if(flg == 'down'){
         //console.log(which);
@@ -149,11 +150,11 @@ function moveInven(which, x, y, flg){
                         break;
                     }
                 }
-
+                //console.log(itemInfo)
                 if(idx == 4){
                     inventory[origin].clicked = false;
                 }
-                else{
+                else if(itemInfo[inventory[origin].id-1].type == availSlot[idx]){
                     idx += 9;
                     //console.log(idx);
                     var temp = inventory[origin];
@@ -161,6 +162,10 @@ function moveInven(which, x, y, flg){
                     inventory[idx] = temp;
                     //console.log(inventory[idx], inventory[origin]);
                     inventory[idx].clicked = false;
+                    setPlayerStatus(playerUnit, null);
+                }
+                else{
+                    inventory[origin].clicked = false;
                 }
             } 
             else{
@@ -170,6 +175,31 @@ function moveInven(which, x, y, flg){
         else{
             inventory[origin].clicked = false;
         }
+    }
+}
+
+function getMouseWhich(x, y){
+    const mArea = {
+        dx : (canvas.width - mainBox.width)/2,
+        ux : (canvas.width - mainBox.width)/2 + mainBox.width,
+        dy : canvas.height - mainBox.height,
+        uy : canvas.height
+    };
+    const iArea = {
+        dx : canvas.width - invenBox.width,
+        ux : canvas.width,
+        dy : canvas.height - invenBox.height,
+        uy : canvas.height
+    };
+
+    if(mArea.dx <= x && mArea.ux >= x && mArea.dy <= y && mArea.uy >= y){
+        return 'inven';
+    }
+    else if(iArea.dx <= x && iArea.ux >= x && iArea.dy <= y && iArea.uy >= y){
+        return 'slot';
+    }
+    else{
+        return 'game';
     }
 }
 

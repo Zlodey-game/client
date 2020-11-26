@@ -1,19 +1,22 @@
 function genMonster(){
-    var min = Math.ceil(canvas.width*0.01);
-    var max = Math.floor(canvas.width*0.99);
-    var randX = Math.floor(Math.random() * (max - min)) + min; //최댓값은 제외, 최솟값은 포함
-
-    var min = Math.ceil(canvas.height*0.01);
-    var max = Math.floor(canvas.height*0.99);
-    var randY = Math.floor(Math.random() * (max - min)) + min; //최댓값은 제외, 최솟값은 포함
-
     var ghostUnit = {
-        x : randX - 18,
-        y : randY - 18,
-        maxHp : 100,
-        hp : 100
+        
     };
     setUnitSize(ghostUnit, 0.093, 0.166, 2.5);
+    
+    var min = Math.ceil (canvas.width * 0.05);
+    var max = Math.floor(canvas.width * 0.95 - ghostUnit.width);
+    var randX = Math.floor(Math.random() * (max - min)) + min; //최댓값은 제외, 최솟값은 포함
+
+    var min = Math.ceil (canvas.height * 0.05);
+    var max = Math.floor(canvas.height - ghostUnit.height - invenBox.height);
+    var randY = Math.floor(Math.random() * (max - min)) + min; //최댓값은 제외, 최솟값은 포함
+
+    ghostUnit.x = randX;
+    ghostUnit.y = randY;
+    ghostUnit.maxHp = 100;
+    ghostUnit.hp = 100;
+
     monsters.push(ghostUnit);
 }
 
@@ -44,6 +47,12 @@ function setPlayerStatus(unit, mode){
         unit.X_speed = unit.oX_speed + unit.oX_speed * (unit.agi * 0.01);
         unit.Y_speed = unit.oY_speed + unit.oY_speed * (unit.agi * 0.01);
     }
+    else{
+        if(inventory[9].id != null) unit.atk = 1 + itemInfo[inventory[9].id-1].atk;
+        if(inventory[10].id != null) unit.def = 1 + itemInfo[inventory[10].id-1].def;
+        if(inventory[11].id != null) unit.maxHp = 1 + itemInfo[inventory[11].id-1].hp;
+        if(inventory[12].id != null) unit.agi = 1 + itemInfo[inventory[12].id-1].agi;
+    }
 }
 
 function attack(){
@@ -54,10 +63,10 @@ function attack(){
     //monsters.pop()
     //console.log(monsters);
     for(let i=0; i<monsters.length; i++){
-        var unit = monsters[i];
+        let unit = monsters[i];
 
-        var agl = Math.atan2((unit.x + unit.width/2) - (p.x + p.width/2), (p.y + p.height/2) - (unit.y + unit.height/2)) * 180 / Math.PI;
-        var len = Math.hypot((p.y + p.height/2) - (unit.y + unit.height/2), (unit.x + unit.width/2) - (p.x + p.width/2));
+        let agl = Math.atan2((unit.x + unit.width/2) - (p.x + p.width/2), (p.y + p.height/2) - (unit.y + unit.height/2)) * 180 / Math.PI;
+        let len = Math.hypot((p.y + p.height/2) - (unit.y + unit.height/2), (unit.x + unit.width/2) - (p.x + p.width/2));
 
 
         if(p.agl - allowDeg < agl && p.agl + allowDeg > agl && len < p.width * 2.0){
@@ -77,10 +86,10 @@ function dropItem(x, y){
     let min = Math.ceil(2);
     let max = Math.floor(14);
     
-    var itemNum = Math.floor(Math.random() * (max - min)) + min; //최댓값은 제외, 최솟값은 포함
+    let itemNum = Math.floor(Math.random() * (max - min)) + min; //최댓값은 제외, 최솟값은 포함
 
     //console.log(x, y, itemNum);
-    var item = {
+    let item = {
         itemId : itemNum,
         x : x,
         y : y,

@@ -19,34 +19,86 @@
     </canvas>
 </body>
 <script type="application/javascript">
-    var canvas;
-    var canvasCtx;
+    let canvas;
+    let canvasCtx;
 
-    var canvasBuffer;
-    var bufferCtx;
+    let canvasBuffer;
+    let bufferCtx;
 
-    var canvasOldWidth;
-    var canvasOldHeight;
+    let canvasOldWidth;
+    let canvasOldHeight;
 
-    var monsters = [];
+    let monsters = [];
 
-    var playerUnit = {}; //Player Unit Property
-    var pointer = {};
-    var inventory = [];
+    let playerUnit = {}; //Player Unit Property
+    let pointer = {};
+    let inventory = [];
 
-    var droppedItems = [];
+    let droppedItems = [];
 
-    var monsterRegenSpeed = 10 * 1000;     //Gap of Thread
-    var ghostUnit = {}; //Player Unit Property
+    const monsterRegenSpeed = 10 * 1000;     //Gap of Thread
+    let ghostUnit = {}; //Player Unit Property
 
-    var threadSpeed = 10;     //Gap of Thread
-    var keyPressOn = {};//pressed - trueaaaaaa
+    const threadSpeed = 10;     //Gap of Thread
+    let keyPressOn = {};//pressed - trueaaaaaa
 
-    var character;
-    var asphalt;
-    var items = [];
+    let character;
+    let asphalt;
+    let items = [];
+    let itemInfo = [
+        {
+            type : 'weapon',
+            atk : 10
+        },{
+            type : 'weapon',
+            atk : 20
+        },{
+            type : 'weapon',
+            atk : 30
+        },{
+            type : 'weapon',
+            atk : 40
+        },{
+            type : 'armor',
+            def : 10
+        },{
+            type : 'armor',
+            def : 20
+        },{
+            type : 'armor',
+            def : 30
+        },{
+            type : 'armor',
+            def : 40
+        },{
+            type : 'shoes',
+            agi : 10
+        },{
+            type : 'shoes',
+            agi : 20
+        },{
+            type : 'shoes',
+            agi : 30
+        },{
+            type : 'shoes',
+            agi : 40
+        },{
+            type : 'pants',
+            hp : 10
+        },{
+            type : 'pants',
+            hp : 20
+        },{
+            type : 'pants',
+            hp : 30
+        }, {
+            type : 'pants',
+            hp : 40
+        }
+    ]
+    
 
-    var gameLoopThread;  //animation Thread ID
+    let gameLoopThread;  //animation Thread ID
 
     let mainBox = {};
     let mainBar = {};
@@ -58,31 +110,6 @@
 
     window.addEventListener("load", init, false);
 
-    function getMouseWhich(x, y){
-        const mArea = {
-            dx : (canvas.width - mainBox.width)/2,
-            ux : (canvas.width - mainBox.width)/2 + mainBox.width,
-            dy : canvas.height - mainBox.height,
-            uy : canvas.height
-        };
-        const iArea = {
-            dx : canvas.width - invenBox.width,
-            ux : canvas.width,
-            dy : canvas.height - invenBox.height,
-            uy : canvas.height
-        };
-
-        if(mArea.dx <= x && mArea.ux >= x && mArea.dy <= y && mArea.uy >= y){
-            return 'inven';
-        }
-        else if(iArea.dx <= x && iArea.ux >= x && iArea.dy <= y && iArea.uy >= y){
-            return 'slot';
-        }
-        else{
-            return 'game';
-        }
-    }
-    
     function init(){
         //canvas = document.getElementById("canvas");
         canvasCtx = canvas.getContext("2d");
