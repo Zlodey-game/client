@@ -205,7 +205,8 @@ function damageMonster(){
                 
                 if(playerUnit.hp < 0){
                     for(i=9; i<13; i++) inventory[i] = {};
-                    
+                    isPause = true;
+
                 }
             }
         }

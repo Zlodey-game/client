@@ -114,6 +114,19 @@
 
     window.addEventListener("load", init, false);
 
+    const color = {
+        gold : '#726447',
+        black : '#050D0B',
+        lightBlack : '#151D1B',
+        darkGreen : '#102020',
+        lightRed : '#EB5335',
+        gray : '#8C8C8C',
+        green : '#70AD47',
+        yellow : '#FFB801',
+        lightYellow : '#CDD121',
+        red : '#BC252A'
+    };
+
     function init(){
         //canvas = document.getElementById("canvas");
         canvasCtx = canvas.getContext("2d");
@@ -237,7 +250,7 @@
 
         for(unit of monsters){
             drawUnit(unit, ghost);
-            drawMonsterHPBar('#050D0B', '#BC252A', '#726447', unit);
+            drawMonsterHPBar(color.black, color.red, color.gold, unit);
         }
 
         setPlayerStatus(playerUnit, 'speed');
@@ -253,65 +266,65 @@
             {
                 name: 'ATK',
                 value: playerUnit.atk,
-                color: '#EB5335'
+                color: color.lightRed
             },
             {
                 name: 'DEF',
                 value: playerUnit.def,
-                color: '#8C8C8C'
+                color: color.gray
             },
             {
                 name: 'H P',
                 value: playerUnit.maxHp,
-                color: '#70AD47'
+                color: color.green
             },
             {
                 name: 'AGI',
                 value: playerUnit.agi,
-                color: '#FFB801'
+                color: color.yellow
             },
             {
                 name: 'L V',
                 value: playerUnit.lv,
-                color: '#CDD121'
+                color: color.lightYellow
             },
             {
                 name: 'EXP',
                 value: playerUnit.exp,
-                color: '#CDD121'
+                color: color.lightYellow
             }
         ];
 
-        drawMainBox('#102020', '#726447', mainBox);
+        drawMainBox({fill: color.darkGreen, line: color.gold});
         
-        drawMainBar('#050D0B', '#00B801', '#726447', mainBar, mainBox, 0.7, playerUnit.hp / playerUnit.maxHp * 100);
-        drawMainBar('#050D0B', '#2183F3', '#726447', mainBar, mainBox, 0.9, playerUnit.mp);
+        drawMainBar({fill: '#00B801', emptyFill: color.black, line: color.gold}, 0.7, playerUnit.hp / playerUnit.maxHp * 100);
+        drawMainBar({fill: '#2183F3', emptyFill: color.black, line: color.gold}, 0.9, playerUnit.mp);
 
         for(let i=0; i<9; i++){
-            drawInven('#151D1B','#726447', inven, mainBox, i);    
+            drawInven({fill: color.lightBlack, line: color.gold}, i);    
         }
 
-        drawStatBox('#102020', '#726447', statBox);
+        drawStatBox({fill: color.darkGreen, line: color.gold});
         
         for(let i=0; i<6; i++){
-            drawStat(list[i].name,  list[i].value, list[i].color , statBar, statBox, i);
+            drawStat(list[i].name,  list[i].value, list[i].color , i);
         }
 
         if(playerUnit.stat != 0){
-            drawLVup('#102020', '#726447', LVupBox, statBox, playerUnit.stat);
+            drawLVup({fill: color.darkGreen, line: color.gold}, playerUnit.stat);
         }
 
-        drawInvenBox('#102020', '#726447', invenBox);
+        drawInvenBox({fill: color.darkGreen, line: color.gold});
 
         for(let i=0; i<4; i++){
-            drawEquipment('#151D1B','#726447', inven, invenBox, i, null);
+            drawEquipment({fill: color.lightBlack, line: color.gold}, i);
         }
 
         for(let i=0; i<14; i++){
-            drawInvenItem(inven, mainBox, inven, invenBox, i, inventory[i]);    
+            drawInvenItem(i, inventory[i]);    
         } 
         if(isPause){
-            drawPauseBox('#102020', '#726447', pauseBox)
+            drawPauseBox({fill: color.darkGreen, line: color.gold})
         }
     }
 

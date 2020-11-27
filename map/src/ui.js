@@ -27,7 +27,11 @@ function drawDroppedItems(){
     }
 }
 
-function drawPauseBox(fill, line, info){
+function drawPauseBox(colorInfo){
+    const fill = colorInfo.fill;
+    const line = colorInfo.line;
+    const info = pauseBox;
+
     const move1 = {
         x : (canvas.width - info.width)/2,
         y : (canvas.height - info.height)/2
@@ -142,7 +146,12 @@ function drawUnit(unit, img = undefined){
     }
 }
 
-function drawEquipment(fill, line, info, pInfo, idx, img){
+function drawEquipment(colorInfo, idx){
+    const fill = colorInfo.fill;
+    const line = colorInfo.line;
+    const info = inven;
+    const pInfo = invenBox;
+
     const move1 = {
         x : canvas.width - pInfo.width,
         y : canvas.height - pInfo.height
@@ -178,7 +187,10 @@ function drawEquipment(fill, line, info, pInfo, idx, img){
     bufferCtx.translate(-move2.x, -move2.y);
 }
 
-function drawInvenBox(fill, line, info){
+function drawInvenBox(colorInfo){
+    const fill = colorInfo.fill;
+    const line = colorInfo.line;
+    const info = invenBox;
     const move1 = {
         x : canvas.width - info.width,
         y : canvas.height - info.height
@@ -205,7 +217,12 @@ function drawInvenBox(fill, line, info){
     bufferCtx.translate(-move1.x, -move1.y);
 }
 
-function drawLVup(fill, line, info, pInfo, num){
+function drawLVup(colorInfo, num){
+    const info = LVupBox;
+    const pInfo = statBox;
+    const fill = colorInfo.fill;
+    const line = colorInfo.line;
+
     const move1 = {
         x : 0,
         y : canvas.height - info.height - info.lineWidth*0.5 - pInfo.height
@@ -261,7 +278,9 @@ function drawLVup(fill, line, info, pInfo, num){
     bufferCtx.translate(-move1.x, -move1.y);
 }
 
-function drawStat(text, value, fill, info, pInfo, idx){
+function drawStat(text, value, fill, idx){
+    const info = statBar;
+    const pInfo = statBox;
     const Y_which = [-1, -1, 0, 0, 1, 1];
     const X_which = [-(pInfo.width - info.width)*0.4, (pInfo.width - info.width)*0.4];
 
@@ -289,7 +308,10 @@ function drawStat(text, value, fill, info, pInfo, idx){
     bufferCtx.translate(-move2.x, -move2.y);
 }
 
-function drawStatBox(fill, line, info){
+function drawStatBox(colorInfo){
+    const fill = colorInfo.fill;
+    const line = colorInfo.line;
+    const info = statBox;
     const move1 = {
         x : 0,
         y : canvas.height - info.height
@@ -322,7 +344,12 @@ function drawStatBox(fill, line, info){
     bufferCtx.translate(-move1.x, -move1.y);
 }
 
-function drawInven(fill, line, info, pInfo, idx){
+function drawInven(colorInfo, idx){
+    const fill = colorInfo.fill;
+    const line = colorInfo.line;
+    const info = inven;
+    const pInfo = mainBox;
+
     const move1 = {
         x : (canvas.width - pInfo.width)/2,
         y : canvas.height - pInfo.height
@@ -359,7 +386,12 @@ function drawInven(fill, line, info, pInfo, idx){
     
 }
 
-function drawInvenItem(info1, pInfo1, info2, pInfo2, idx, item){
+function drawInvenItem(idx, item){
+    const info1 = inven;
+    const pInfo1 = mainBox;
+    const info2 = info1;
+    const pInfo2 = invenBox;
+    
     if(idx < 9){
         const move1 = {
             x : (canvas.width - pInfo1.width)/2,
@@ -423,11 +455,15 @@ function drawInvenItem(info1, pInfo1, info2, pInfo2, idx, item){
     
 }
 
-function drawMainBox(fill, line, info){
+function drawMainBox(colorInfo){
+    const info = mainBox;
+    const fill = colorInfo.fill;
+    const line = colorInfo.line;
     const move1 = {
         x : (canvas.width - info.width)/2,
         y : canvas.height - info.height
     };
+    
 
     bufferCtx.translate(move1.x, move1.y);
     
@@ -449,7 +485,12 @@ function drawMainBox(fill, line, info){
     bufferCtx.translate( -move1.x, -move1.y);
 }
 
-function drawMainBar(emptyfill, fill, line, info, pInfo, height, value){
+function drawMainBar(colorInfo, height, value){
+    const fill = colorInfo.fill;
+    const emptyfill = colorInfo.emptyFill;
+    const line = colorInfo.line;
+    const info = mainBar;
+    const pInfo = mainBox;
     const move1 = {
         x : (canvas.width - pInfo.width)/2,
         y : canvas.height - pInfo.height
@@ -497,8 +538,6 @@ function drawMainBar(emptyfill, fill, line, info, pInfo, height, value){
         bufferCtx.fill();
     }
 
-    bufferCtx.fillStyle = fill;  
-    bufferCtx.fill();
 
     bufferCtx.translate(-move1.x, -move1.y);
     bufferCtx.translate(-move2.x, -move2.y);
