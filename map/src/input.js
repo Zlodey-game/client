@@ -2,6 +2,7 @@ document.addEventListener("mousemove", (e) => {
     pointer.x = e.clientX;
     pointer.y = e.clientY;
     
+    //console.log(isPause);
     setUnitAngle(playerUnit, pointer.x, pointer.y);
 }, false);
 
@@ -70,6 +71,8 @@ function moveInven(which, x, y, flg){
 
     if(flg == 'down'){
         //console.log(which);
+        if(isPause) return;
+
         for(let i=0; i<13; i++){
             inventory[i].clicked = false;
         }
@@ -108,7 +111,12 @@ function moveInven(which, x, y, flg){
     else if(flg == 'up'){
         //console.log(which);
         const origin = inventory.findIndex(obj=>obj.clicked==true);
-
+        if(isPause){
+            for(item of inventory){
+                item.clicked = false;
+            }
+            return
+        }
         if(which == 'inven'){
             //console.log(y, invBox.dy, invBox.uy);
             if(invBox.dy <= y && invBox.uy >= y){
@@ -132,11 +140,14 @@ function moveInven(which, x, y, flg){
                     inventory[idx] = temp;
                     //console.log(inventory[idx], inventory[origin]);
                     inventory[idx].clicked = false;
+                    if(origin != idx && origin > 8) setPlayerStatus(playerUnit, idx, origin);
                 }
+
             } 
             else{
                 inventory[origin].clicked = false;
             }
+            
         }
         else if(which == 'slot'){
             //console.log(y, sloBox.dy, sloBox.uy);
@@ -162,7 +173,7 @@ function moveInven(which, x, y, flg){
                     inventory[idx] = temp;
                     //console.log(inventory[idx], inventory[origin]);
                     inventory[idx].clicked = false;
-                    setPlayerStatus(playerUnit, null);
+                    if(origin != idx) setPlayerStatus(playerUnit, idx, origin);
                 }
                 else{
                     inventory[origin].clicked = false;
@@ -171,10 +182,14 @@ function moveInven(which, x, y, flg){
             else{
                 inventory[origin].clicked = false;
             }
+            
         }
         else{
+            if(origin != idx) setPlayerStatus(playerUnit, null, origin);
             inventory[origin].clicked = false;
+            inventory[origin] = {};
         }
+        
     }
 }
 
@@ -194,6 +209,7 @@ function getMouseWhich(x, y){
 
     if(mArea.dx <= x && mArea.ux >= x && mArea.dy <= y && mArea.uy >= y){
         return 'inven';
+         
     }
     else if(iArea.dx <= x && iArea.ux >= x && iArea.dy <= y && iArea.uy >= y){
         return 'slot';
@@ -207,7 +223,7 @@ function checkGetItem(unit, item, idx){
     if(unit.x < item.x + item.len * 0.5 && unit.x + unit.width > item.x + item.len * 0.5 && 
        unit.y < item.y + item.len * 0.5 && unit.y + unit.height > item.y + item.len * 0.5){
         var emptyIdx = inventory.findIndex(obj=>obj.id == undefined);
-        if(emptyIdx < 9){
+        if(emptyIdx < 9 && emptyIdx >= 0){
             inventory[emptyIdx].id = item.itemId;
             droppedItems.splice(idx, 1);
         }

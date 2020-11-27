@@ -27,6 +27,37 @@ function drawDroppedItems(){
     }
 }
 
+function drawPauseBox(fill, line, info){
+    const move1 = {
+        x : (canvas.width - info.width)/2,
+        y : (canvas.height - info.height)/2
+    };
+
+    bufferCtx.fillStyle = 'rgba(11,11,11,0.7)';
+    bufferCtx.fillRect(0,0,canvas.width, canvas.height);
+
+    bufferCtx.translate(move1.x, move1.y);
+    
+    bufferCtx.beginPath();
+    bufferCtx.moveTo(0, info.radius);
+    bufferCtx.quadraticCurveTo(0, 0, info.radius, 0);
+    bufferCtx.lineTo(info.width - info.radius, 0);
+    bufferCtx.quadraticCurveTo(info.width, 0, info.width, info.radius);
+    bufferCtx.lineTo(info.width, info.height - info.radius);
+    bufferCtx.quadraticCurveTo(info.width, info.height, info.width - info.radius, info.height);
+    bufferCtx.lineTo(info.radius, info.height);
+    bufferCtx.quadraticCurveTo(0, info.height, 0, info.height - info.radius);
+    bufferCtx.lineTo(0, info.radius);
+    
+    bufferCtx.strokeStyle = line;        // set the color for the circle to 'green'
+    bufferCtx.lineWidth = info.lineWidth;  
+    bufferCtx.stroke();
+    bufferCtx.fillStyle = fill;  
+    bufferCtx.fill();
+    
+    bufferCtx.translate( -move1.x, -move1.y);
+}
+
 function drawMonsterHPBar(emptyfill, fill, line, info){
     const move1 = {
         x : info.x,
@@ -200,12 +231,32 @@ function drawLVup(fill, line, info, pInfo, num){
     bufferCtx.fill();
 
     bufferCtx.fillStyle = "#e9e9e9";  
-    bufferCtx.font = `medium ${info.height*0.4}px Noto Sans KR`;
-    bufferCtx.fillText('남은 포인트', info.width*0.15, (info.height - info.height*0.25)/1.2);
+    bufferCtx.font = `medium ${info.height*0.5}px Noto Sans KR`;
+    bufferCtx.fillText('남은 포인트', info.width*0.14, (info.height - info.height*0.25)/2);
 
     bufferCtx.fillStyle = "#FFB801";  
-    bufferCtx.font = `bold ${info.height*0.45}px Noto Sans KR`;
-    bufferCtx.fillText(num, info.width*0.65, (info.height - info.height*0.21)/1.2);
+    bufferCtx.font = `Bold ${info.height*0.3}px Noto Sans KR`;
+    bufferCtx.fillText(num, info.width*0.6, (info.height - info.height*0.21)/2);
+
+    bufferCtx.fillStyle = "#EB5335";  
+    bufferCtx.font = `bold ${info.height*0.18}px Noto Sans KR`;
+    bufferCtx.fillText('Shift + R', info.width*0.05, (info.height*0.7));
+    bufferCtx.fillText('▲', info.width*0.35, (info.height*0.7));
+
+    bufferCtx.fillStyle = "#8C8C8C";  
+    bufferCtx.font = `bold ${info.height*0.18}px Noto Sans KR`;
+    bufferCtx.fillText('Shift + T', info.width*0.55, (info.height*0.7));
+    bufferCtx.fillText('▲', info.width*0.85, (info.height*0.7));
+
+    bufferCtx.fillStyle = "#70AD47";  
+    bufferCtx.font = `bold ${info.height*0.18}px Noto Sans KR`;
+    bufferCtx.fillText('Shift + F', info.width*0.05, (info.height*0.91));
+    bufferCtx.fillText('▲', info.width*0.35, (info.height*0.91));
+
+    bufferCtx.fillStyle = "#FFB801";  
+    bufferCtx.font = `bold ${info.height*0.18}px Noto Sans KR`;
+    bufferCtx.fillText('Shift + K', info.width*0.55, (info.height*0.91));
+    bufferCtx.fillText('▲', info.width*0.85, (info.height*0.91));
     
     bufferCtx.translate(-move1.x, -move1.y);
 }
@@ -451,6 +502,67 @@ function drawMainBar(emptyfill, fill, line, info, pInfo, height, value){
 
     bufferCtx.translate(-move1.x, -move1.y);
     bufferCtx.translate(-move2.x, -move2.y);
+}
+
+function drawVailage(){
+    var width = canvas.width;
+    var height = canvas.height;
+    bufferCtx.drawImage(asphalt, 0, 0, width, height);
+
+    bufferCtx.fillStyle = "rgb(206, 206, 206)";
+    // Left
+    bufferCtx.beginPath();
+    bufferCtx.moveTo(0,0);
+    bufferCtx.lineTo(canvas.width*0.065,0);
+    bufferCtx.lineTo(0,height*0.7);
+    bufferCtx.closePath();
+    bufferCtx.fill();
+    // Right
+    bufferCtx.beginPath();
+    bufferCtx.moveTo(width,0);
+    bufferCtx.lineTo(width - width*0.065,0);
+    bufferCtx.lineTo(width,height*0.7);
+    bufferCtx.closePath();
+    bufferCtx.fill();
+
+    // 보도
+    bufferCtx.fillStyle = "rgb(244, 177, 131)";
+    // Left
+    bufferCtx.beginPath();
+    bufferCtx.moveTo(0,0);
+    bufferCtx.lineTo(width*0.04,0);
+    bufferCtx.lineTo(0,height*0.4);
+    bufferCtx.closePath();
+    bufferCtx.fill();
+    // Right
+    bufferCtx.beginPath();
+    bufferCtx.moveTo(width,0);
+    bufferCtx.lineTo(width - width*0.04,0);
+    bufferCtx.lineTo(width,height*0.4);
+    bufferCtx.closePath();
+    bufferCtx.fill();
+
+    // 중앙선
+    bufferCtx.fillStyle = "rgb(255, 192, 0)";  
+    bufferCtx.fillRect (width * 0.485 - (width*0.014)/2, 0, width*0.014, height);
+    bufferCtx.fillRect (width * 0.515 - (width*0.014)/2, 0, width*0.014, height);
+
+    const lineLen = height*0.208;
+    const rightGap = height*0.152;
+    // 차선
+    bufferCtx.fillStyle = "rgb(255, 255, 255)"; 
+    // Left
+    bufferCtx.rotate((5/180)*Math.PI);
+    for(let i=0; i<5; i++){
+        bufferCtx.fillRect (width * 0.27 - (width*0.014)/2, lineLen * i, width*0.014, height*0.1);    
+    }
+    bufferCtx.rotate((-5/180)*Math.PI);
+    // Right
+    bufferCtx.rotate((-5/180)*Math.PI);
+    for(let i=0; i<5; i++){
+        bufferCtx.fillRect (width * (1-0.28) - (width*0.014)/2, rightGap + lineLen * i, width*0.014, height*0.1);    
+    }
+    bufferCtx.rotate((5/180)*Math.PI);
 }
 
 function drawRoad(){

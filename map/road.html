@@ -37,10 +37,13 @@
     let droppedItems = [];
 
     const monsterRegenSpeed = 10 * 1000;     //Gap of Thread
-    let ghostUnit = {}; //Player Unit Property
 
-    const threadSpeed = 10;     //Gap of Thread
+    const threadSpeed = 12;     //Gap of Thread
     let keyPressOn = {};//pressed - trueaaaaaa
+
+    let isPause = false;
+    let isPush = false;
+    let oldPush = 0;
 
     let character;
     let asphalt;
@@ -107,6 +110,7 @@
     let statBar = {};
     let LVupBox = {};
     let invenBox = {};
+    let pauseBox = {};
 
     window.addEventListener("load", init, false);
 
@@ -120,23 +124,19 @@
         playerUnit.y = canvas.height / 2 - 18;
         playerUnit.agl = 0;
 
-        playerUnit.atk = 30;
-        playerUnit.def = 500;
-        playerUnit.maxHp = 100;
+        playerUnit.atk = 1;
+        playerUnit.def = 0;
+        playerUnit.maxHp = 30;
         playerUnit.agi = 0;
         playerUnit.lv = 1;
-        playerUnit.exp = 100;
+        playerUnit.exp = 0;
+        playerUnit.stat = 100;
 
-        playerUnit.hp = 50;
+        playerUnit.hp = 30;
         playerUnit.mp = 0;
 
         pointer.x = playerUnit.x;
         pointer.y = playerUnit.y;
-
-        ghostUnit.x = canvas.width / 2 - 18;
-        ghostUnit.y = canvas.height / 2 - 18;
-        ghostUnit.maxHp = 100;
-        ghostUnit.hp = 100;
 
         document.addEventListener("keydown", getKeyDown, false);
         document.addEventListener("keyup", getKeyUp, false);
@@ -147,7 +147,7 @@
 
         monsterRegenThread = setInterval(genMonster, monsterRegenSpeed);
 
-        monsters.push(ghostUnit);
+        genMonster();
 
         for(let i=0; i<13; i++){
             inventory[i] = {};
@@ -159,26 +159,65 @@
     function gameLoop(){  
         calcKeyInput();
         displayAll();
+        if(!isPause){
+            moveMonster();
+            damageMonster();
+        }
     }
 
     function calcKeyInput(){
-        let agl = null;
-        let changed = false;
+        
         //console.log(keyPressOn);
-        if(keyPressOn["38"] && playerUnit.y >= 0){
-            playerUnit.y -= playerUnit.Y_speed;  //up
-        }
-        if(keyPressOn["40"] && playerUnit.y <= canvas.height -playerUnit.height){
-            
-            playerUnit.y += playerUnit.Y_speed;  //down
-        }
-        if(keyPressOn["37"] && playerUnit.x >= 0){
-            playerUnit.x -= playerUnit.X_speed;  //left
-        }
-        if(keyPressOn["39"] && playerUnit.x <= canvas.width - playerUnit.width){
-            playerUnit.x += playerUnit.X_speed;  //right
+        if(!isPause){
+            if(keyPressOn["38"] && playerUnit.y >= 0){
+                playerUnit.y -= playerUnit.Y_speed;  //up
+            }
+            if(keyPressOn["40"] && playerUnit.y <= canvas.height -playerUnit.height){
+                
+                playerUnit.y += playerUnit.Y_speed;  //down
+            }
+            if(keyPressOn["37"] && playerUnit.x >= 0){
+                playerUnit.x -= playerUnit.X_speed;  //left
+            }
+            if(keyPressOn["39"] && playerUnit.x <= canvas.width - playerUnit.width){
+                playerUnit.x += playerUnit.X_speed;  //right
+            }
+
+            if(playerUnit.stat != 0){
+                if(keyPressOn["16"]){
+                    let keyArr = [82, 84, 70, 71];
+                    for(let i=0; i<4; i++){
+                        if(keyPressOn[`${keyArr[i]}`] && !isPush && oldPush == 0){
+                            if(i == 0) playerUnit.atk++;
+                            else if(i == 1) playerUnit.def++;
+                            else if(i == 2) playerUnit.maxHp++;
+                            else if(i == 3) playerUnit.agi++;
+                            playerUnit.stat--;
+                            isPush = !isPush;
+                            oldPush = keyArr[i];
+                        }
+                        else if(!keyPressOn[`${keyArr[i]}`] && isPush && oldPush == keyArr[i]){
+                            isPush = false;
+                            oldPush = 0;
+                        }
+                    }
+                }
+            }
+            else{
+                oldPush = 0;
+            }   
         }
         
+        if(keyPressOn["27"] && !isPush && oldPush == 0){
+            
+            isPause = !isPause;
+            isPush = !isPush;
+            console.log(isPause);
+        }
+        else if(!keyPressOn["27"] && isPush && oldPush == 0){
+            isPush = !isPush;
+        }
+
         for(let i = 0; i<droppedItems.length; i++){
             //console.log(droppedItems);
             checkGetItem(playerUnit, droppedItems[i], i);
@@ -258,7 +297,9 @@
             drawStat(list[i].name,  list[i].value, list[i].color , statBar, statBox, i);
         }
 
-        drawLVup('#102020', '#726447', LVupBox, statBox, 3);
+        if(playerUnit.stat != 0){
+            drawLVup('#102020', '#726447', LVupBox, statBox, playerUnit.stat);
+        }
 
         drawInvenBox('#102020', '#726447', invenBox);
 
@@ -268,9 +309,13 @@
 
         for(let i=0; i<14; i++){
             drawInvenItem(inven, mainBox, inven, invenBox, i, inventory[i]);    
+        } 
+        if(isPause){
+            drawPauseBox('#102020', '#726447', pauseBox)
         }
     }
 
+    
     
 </script>
 </html>

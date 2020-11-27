@@ -28,8 +28,6 @@ function setCanvasSize() {
 
     setUnitSize(playerUnit, 0.06, 0.106, 2.5);
 
-    setUnitSize(ghostUnit, 0.093, 0.166, 2.5);
-
     canvasOldWidth = canvas.width;
     canvasOldHeight = canvas.height;
 }
@@ -67,7 +65,7 @@ function setUIBoxes(){
     };
     LVupBox = {  
         width : statBox.width ,
-        height : statBox.height * 0.5,
+        height : statBox.height * 1,
         radius : canvas.width * 0.01,
         lineWidth : canvas.width * 0.008
     }
@@ -75,6 +73,13 @@ function setUIBoxes(){
     invenBox = {
         width : canvas.width * 0.2,
         height : canvas.height * 0.18,
+        radius : canvas.width * 0.01,
+        lineWidth : canvas.width * 0.008
+    };
+
+    pauseBox = {
+        width : canvas.width * 0.34,
+        height : canvas.height * 0.3,
         radius : canvas.width * 0.01,
         lineWidth : canvas.width * 0.008
     };
