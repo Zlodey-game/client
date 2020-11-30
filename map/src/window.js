@@ -28,6 +28,12 @@ function setCanvasSize() {
 
     setUnitSize(playerUnit, 0.06, 0.106, 2.5);
 
+    if(typeof monsters != 'undefined'){
+        for(m of monsters){
+            setUnitSize(m, 0.093, 0.166, 2.5);
+        }
+    }
+
     canvasOldWidth = canvas.width;
     canvasOldHeight = canvas.height;
 }

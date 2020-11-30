@@ -7,7 +7,7 @@ document.addEventListener("mousemove", (e) => {
 }, false);
 
 document.addEventListener("click", (e)=>{
-    if(getMouseWhich(e.clientX, e.clientY) == 'game') attack();
+    if(getMouseWhich(e.clientX, e.clientY) == 'game' && typeof monsters != 'undefined') attack();
 }, false);
 
 document.addEventListener("mousedown", (e)=>{
@@ -228,4 +228,69 @@ function checkGetItem(unit, item, idx){
             droppedItems.splice(idx, 1);
         }
     }
+}
+
+function calcKeyInput(){
+    //console.log(keyPressOn);
+    if(!isPause){
+        if(keyPressOn["38"] && playerUnit.y >= 0){
+            playerUnit.y -= playerUnit.Y_speed;  //up
+        }
+        if(keyPressOn["40"] && playerUnit.y <= canvas.height -playerUnit.height){
+            
+            playerUnit.y += playerUnit.Y_speed;  //down
+        }
+        if(keyPressOn["37"] && playerUnit.x >= 0){
+            playerUnit.x -= playerUnit.X_speed;  //left
+        }
+        if(keyPressOn["39"] && playerUnit.x <= canvas.width - playerUnit.width){
+            playerUnit.x += playerUnit.X_speed;  //right
+        }
+        
+        if(playerUnit.stat != 0){
+            if(keyPressOn["16"]){
+                let keyArr = [82, 84, 70, 71];
+                for(let i=0; i<4; i++){
+                    if(keyPressOn[`${keyArr[i]}`] && !isPush && oldPush == 0){
+                        if(i == 0) playerUnit.atk++;
+                        else if(i == 1) playerUnit.def++;
+                        else if(i == 2) playerUnit.maxHp++;
+                        else if(i == 3) playerUnit.agi++;
+                        playerUnit.stat--;
+                        isPush = !isPush;
+                        oldPush = keyArr[i];
+                    }
+                    else if(!keyPressOn[`${keyArr[i]}`] && isPush && oldPush == keyArr[i]){
+                        isPush = false;
+                        oldPush = 0;
+                    }
+                }
+            }
+        }
+        else{
+            oldPush = 0;
+        }   
+
+        
+    }
+    
+    // ESC
+    if(keyPressOn["27"] && !isPush && oldPush == 0){
+        isPause = !isPause;
+        isPush = !isPush;
+        console.log(isPause);
+    }
+    else if(!keyPressOn["27"] && isPush && oldPush == 0){
+        isPush = !isPush;
+    }
+
+    if(typeof droppedItems != 'undefined'){
+        for(let i = 0; i<droppedItems.length; i++){
+            //console.log(droppedItems);
+            checkGetItem(playerUnit, droppedItems[i], i);
+        }
+    }
+       
+    setUnitAngle(playerUnit, pointer.x, pointer.y);
+    //if(agl != null) playerUnit.agl = agl;
 }

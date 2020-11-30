@@ -1,20 +1,126 @@
+const color = {
+    gold : '#726447',
+    black : '#050D0B',
+    lightBlack : '#151D1B',
+    darkGreen : '#102020',
+    lightRed : '#EB5335',
+    gray : '#8C8C8C',
+    green : '#70AD47',
+    yellow : '#FFB801',
+    lightYellow : '#CDD121',
+    red : '#BC252A',
+    lightBlue : '#0EB5CF'
+};
 
+function drawRecallRing(size, agl){
+    const p = {
+        x : playerUnit.x + playerUnit.width/2,
+        y : playerUnit.y + playerUnit.height/2
+    };
 
-function setImage(){
-    character = new Image();
-    character.src = "char.png";
+    bufferCtx.translate(p.x, p.y);
+    bufferCtx.rotate((Math.PI/180)*agl);
+    
+    const add = playerUnit.width * 0.9 / 2 * size / 100;
+    bufferCtx.lineCap = "round"; 
+    
+    bufferCtx.beginPath();
+    bufferCtx.strokeStyle = 'rgba(142, 255, 255, 0.5)';
+    bufferCtx.lineWidth = playerUnit.width * 0.05 * size / 100;
+    bufferCtx.arc(0, 0, playerUnit.width * 0.9 * size / 100, 0, (Math.PI/180)*360, 1);
+    bufferCtx.stroke();
 
-    ghost = new Image();
-    ghost.src = "ghost.png";
+    bufferCtx.lineWidth = playerUnit.width * 0.23 * size / 100;
 
-    asphalt = new Image();
-    asphalt.src = "asphalt.jpg";
+    const grd1=bufferCtx.createLinearGradient(-add, -add, +add, +add);
+    grd1.addColorStop(0  , 'rgba(142, 255, 255, 1)');
+    grd1.addColorStop(0.7, 'rgba(142, 255, 255, 0.5)');
+    grd1.addColorStop(1  , 'rgba(14, 151, 207, 0.4');
+    bufferCtx.strokeStyle = grd1;
+    
+    bufferCtx.beginPath();
+    bufferCtx.arc(0, 0, playerUnit.width  * 0.8 * size / 100, 0, (Math.PI/180)*165, false);
+    bufferCtx.stroke();
 
-    for(let i=2; i<14; i++){
-        items[i] = new Image();
-        items[i].src = `itemImg/${i}.png`;
+    
+    const grd2=bufferCtx.createLinearGradient(-add, -add, +add, +add);
+    grd2.addColorStop(1  , 'rgba(142, 255, 255, 1)');
+    grd2.addColorStop(0.3, 'rgba(142, 255, 255, 0.5)');
+    grd2.addColorStop(0  , 'rgba(14, 151, 207, 0.4)');
+    bufferCtx.strokeStyle = grd2;
+
+    bufferCtx.beginPath();
+    bufferCtx.arc(0, 0, playerUnit.width  * 0.8 * size / 100, (Math.PI/180)*180, (Math.PI/180)*345, false);
+    bufferCtx.stroke();
+    bufferCtx.rotate((Math.PI/180)*-agl);
+    bufferCtx.translate(-p.x, -p.y);
+}
+
+function drawMainUI(){
+    let list = [
+        {
+            name: 'ATK',
+            value: playerUnit.atk,
+            color: color.lightRed
+        },
+        {
+            name: 'DEF',
+            value: playerUnit.def,
+            color: color.gray
+        },
+        {
+            name: 'H P',
+            value: playerUnit.maxHp,
+            color: color.green
+        },
+        {
+            name: 'AGI',
+            value: playerUnit.agi,
+            color: color.yellow
+        },
+        {
+            name: 'L V',
+            value: playerUnit.lv,
+            color: color.lightYellow
+        },
+        {
+            name: 'EXP',
+            value: playerUnit.exp,
+            color: color.lightYellow
+        }
+    ];
+
+    drawMainBox({fill: color.darkGreen, line: color.gold});
+    
+    drawMainBar({fill: '#00B801', emptyFill: color.black, line: color.gold}, 0.7, playerUnit.hp / playerUnit.maxHp * 100);
+    drawMainBar({fill: '#2183F3', emptyFill: color.black, line: color.gold}, 0.9, playerUnit.mp);
+
+    for(let i=0; i<9; i++){
+        drawInven({fill: color.lightBlack, line: color.gold}, i);    
     }
-    //console.log(ghost);
+
+    drawStatBox({fill: color.darkGreen, line: color.gold});
+    
+    for(let i=0; i<6; i++){
+        drawStat(list[i].name,  list[i].value, list[i].color , i);
+    }
+
+    if(playerUnit.stat != 0){
+        drawLVup({fill: color.darkGreen, line: color.gold}, playerUnit.stat);
+    }
+
+    drawInvenBox({fill: color.darkGreen, line: color.gold});
+
+    for(let i=0; i<4; i++){
+        drawEquipment({fill: color.lightBlack, line: color.gold}, i);
+    }
+
+    for(let i=0; i<14; i++){
+        drawInvenItem(i, inventory[i]);    
+    } 
+    if(isPause){
+        drawPauseBox({fill: color.darkGreen, line: color.gold})
+    }
 }
 
 function drawDroppedItems(){
@@ -116,10 +222,11 @@ function drawUnit(unit, img = undefined){
         bufferCtx.beginPath();
         bufferCtx.arc(unit.x + unit.width / 2, unit.y + unit.height / 2, unit.width / 2, 0, (Math.PI/180)*360, 1);
         bufferCtx.fillStyle = '#F8C574';
+        bufferCtx.lineWidth = canvas.height*0.01;  
         bufferCtx.strokeStyle = '#352C17'
 
         bufferCtx.fill();
-        let move1 = {
+        const move1 = {
             x : unit.x + unit.width / 2,
             y : unit.y + unit.width / 2
         };
@@ -251,30 +358,23 @@ function drawLVup(colorInfo, num){
     bufferCtx.font = `medium ${info.height*0.5}px Noto Sans KR`;
     bufferCtx.fillText('남은 포인트', info.width*0.14, (info.height - info.height*0.25)/2);
 
-    bufferCtx.fillStyle = "#FFB801";  
+    bufferCtx.fillStyle = color.yellow;  
     bufferCtx.font = `Bold ${info.height*0.3}px Noto Sans KR`;
     bufferCtx.fillText(num, info.width*0.6, (info.height - info.height*0.21)/2);
-
-    bufferCtx.fillStyle = "#EB5335";  
-    bufferCtx.font = `bold ${info.height*0.18}px Noto Sans KR`;
-    bufferCtx.fillText('Shift + R', info.width*0.05, (info.height*0.7));
-    bufferCtx.fillText('▲', info.width*0.35, (info.height*0.7));
-
-    bufferCtx.fillStyle = "#8C8C8C";  
-    bufferCtx.font = `bold ${info.height*0.18}px Noto Sans KR`;
-    bufferCtx.fillText('Shift + T', info.width*0.55, (info.height*0.7));
-    bufferCtx.fillText('▲', info.width*0.85, (info.height*0.7));
-
-    bufferCtx.fillStyle = "#70AD47";  
-    bufferCtx.font = `bold ${info.height*0.18}px Noto Sans KR`;
-    bufferCtx.fillText('Shift + F', info.width*0.05, (info.height*0.91));
-    bufferCtx.fillText('▲', info.width*0.35, (info.height*0.91));
-
-    bufferCtx.fillStyle = "#FFB801";  
-    bufferCtx.font = `bold ${info.height*0.18}px Noto Sans KR`;
-    bufferCtx.fillText('Shift + K', info.width*0.55, (info.height*0.91));
-    bufferCtx.fillText('▲', info.width*0.85, (info.height*0.91));
     
+    const textInfo = [
+        {w : 0.05, h: 0.70, cmd: 'R', color: color.lightRed},
+        {w : 0.55, h: 0.70, cmd: 'T', color: color.gray},
+        {w : 0.05, h: 0.91, cmd: 'F', color: color.green},
+        {w : 0.55, h: 0.91, cmd: 'G', color: color.yellow}
+    ];
+    for(i of textInfo){
+        bufferCtx.fillStyle = i.color;  
+        bufferCtx.font = `bold ${info.height*0.18}px Noto Sans KR`;
+        bufferCtx.fillText(`Shift + ${i.cmd}`, info.width*i.w, (info.height*i.h));
+        bufferCtx.fillText('▲', info.width*(i.w+0.30), (info.height*i.h));
+    }
+
     bufferCtx.translate(-move1.x, -move1.y);
 }
 
@@ -541,126 +641,4 @@ function drawMainBar(colorInfo, height, value){
 
     bufferCtx.translate(-move1.x, -move1.y);
     bufferCtx.translate(-move2.x, -move2.y);
-}
-
-function drawVailage(){
-    var width = canvas.width;
-    var height = canvas.height;
-    bufferCtx.drawImage(asphalt, 0, 0, width, height);
-
-    bufferCtx.fillStyle = "rgb(206, 206, 206)";
-    // Left
-    bufferCtx.beginPath();
-    bufferCtx.moveTo(0,0);
-    bufferCtx.lineTo(canvas.width*0.065,0);
-    bufferCtx.lineTo(0,height*0.7);
-    bufferCtx.closePath();
-    bufferCtx.fill();
-    // Right
-    bufferCtx.beginPath();
-    bufferCtx.moveTo(width,0);
-    bufferCtx.lineTo(width - width*0.065,0);
-    bufferCtx.lineTo(width,height*0.7);
-    bufferCtx.closePath();
-    bufferCtx.fill();
-
-    // 보도
-    bufferCtx.fillStyle = "rgb(244, 177, 131)";
-    // Left
-    bufferCtx.beginPath();
-    bufferCtx.moveTo(0,0);
-    bufferCtx.lineTo(width*0.04,0);
-    bufferCtx.lineTo(0,height*0.4);
-    bufferCtx.closePath();
-    bufferCtx.fill();
-    // Right
-    bufferCtx.beginPath();
-    bufferCtx.moveTo(width,0);
-    bufferCtx.lineTo(width - width*0.04,0);
-    bufferCtx.lineTo(width,height*0.4);
-    bufferCtx.closePath();
-    bufferCtx.fill();
-
-    // 중앙선
-    bufferCtx.fillStyle = "rgb(255, 192, 0)";  
-    bufferCtx.fillRect (width * 0.485 - (width*0.014)/2, 0, width*0.014, height);
-    bufferCtx.fillRect (width * 0.515 - (width*0.014)/2, 0, width*0.014, height);
-
-    const lineLen = height*0.208;
-    const rightGap = height*0.152;
-    // 차선
-    bufferCtx.fillStyle = "rgb(255, 255, 255)"; 
-    // Left
-    bufferCtx.rotate((5/180)*Math.PI);
-    for(let i=0; i<5; i++){
-        bufferCtx.fillRect (width * 0.27 - (width*0.014)/2, lineLen * i, width*0.014, height*0.1);    
-    }
-    bufferCtx.rotate((-5/180)*Math.PI);
-    // Right
-    bufferCtx.rotate((-5/180)*Math.PI);
-    for(let i=0; i<5; i++){
-        bufferCtx.fillRect (width * (1-0.28) - (width*0.014)/2, rightGap + lineLen * i, width*0.014, height*0.1);    
-    }
-    bufferCtx.rotate((5/180)*Math.PI);
-}
-
-function drawRoad(){
-    var width = canvas.width;
-    var height = canvas.height;
-    bufferCtx.drawImage(asphalt, 0, 0, width, height);
-
-    bufferCtx.fillStyle = "rgb(206, 206, 206)";
-    // Left
-    bufferCtx.beginPath();
-    bufferCtx.moveTo(0,0);
-    bufferCtx.lineTo(canvas.width*0.065,0);
-    bufferCtx.lineTo(0,height*0.7);
-    bufferCtx.closePath();
-    bufferCtx.fill();
-    // Right
-    bufferCtx.beginPath();
-    bufferCtx.moveTo(width,0);
-    bufferCtx.lineTo(width - width*0.065,0);
-    bufferCtx.lineTo(width,height*0.7);
-    bufferCtx.closePath();
-    bufferCtx.fill();
-
-    // 보도
-    bufferCtx.fillStyle = "rgb(244, 177, 131)";
-    // Left
-    bufferCtx.beginPath();
-    bufferCtx.moveTo(0,0);
-    bufferCtx.lineTo(width*0.04,0);
-    bufferCtx.lineTo(0,height*0.4);
-    bufferCtx.closePath();
-    bufferCtx.fill();
-    // Right
-    bufferCtx.beginPath();
-    bufferCtx.moveTo(width,0);
-    bufferCtx.lineTo(width - width*0.04,0);
-    bufferCtx.lineTo(width,height*0.4);
-    bufferCtx.closePath();
-    bufferCtx.fill();
-
-    // 중앙선
-    bufferCtx.fillStyle = "rgb(255, 192, 0)";  
-    bufferCtx.fillRect (width * 0.485 - (width*0.014)/2, 0, width*0.014, height);
-    bufferCtx.fillRect (width * 0.515 - (width*0.014)/2, 0, width*0.014, height);
-
-    const lineLen = height*0.208;
-    const rightGap = height*0.152;
-    // 차선
-    bufferCtx.fillStyle = "rgb(255, 255, 255)"; 
-    // Left
-    bufferCtx.rotate((5/180)*Math.PI);
-    for(let i=0; i<5; i++){
-        bufferCtx.fillRect (width * 0.27 - (width*0.014)/2, lineLen * i, width*0.014, height*0.1);    
-    }
-    bufferCtx.rotate((-5/180)*Math.PI);
-    // Right
-    bufferCtx.rotate((-5/180)*Math.PI);
-    for(let i=0; i<5; i++){
-        bufferCtx.fillRect (width * (1-0.28) - (width*0.014)/2, rightGap + lineLen * i, width*0.014, height*0.1);    
-    }
-    bufferCtx.rotate((5/180)*Math.PI);
 }

@@ -1,3 +1,55 @@
+itemInfo = [
+    {
+        type : 'weapon',
+        atk : 10
+    },{
+        type : 'weapon',
+        atk : 20
+    },{
+        type : 'weapon',
+        atk : 30
+    },{
+        type : 'weapon',
+        atk : 40
+    },{
+        type : 'armor',
+        def : 10
+    },{
+        type : 'armor',
+        def : 20
+    },{
+        type : 'armor',
+        def : 30
+    },{
+        type : 'armor',
+        def : 40
+    },{
+        type : 'shoes',
+        agi : 10
+    },{
+        type : 'shoes',
+        agi : 20
+    },{
+        type : 'shoes',
+        agi : 30
+    },{
+        type : 'shoes',
+        agi : 40
+    },{
+        type : 'pants',
+        hp : 10
+    },{
+        type : 'pants',
+        hp : 20
+    },{
+        type : 'pants',
+        hp : 30
+    }, {
+        type : 'pants',
+        hp : 40
+    }
+];
+
 function genMonster(){
     //console.log(isPause);
     if(!isPause){
@@ -34,6 +86,23 @@ function genMonster(){
     }
 }
 
+function initPlayer(unit){
+    unit.x = canvas.width / 2 - 18;
+    unit.y = canvas.height / 2 - 18;
+    unit.agl = 0;
+
+    unit.atk = 1;
+    unit.def = 0;
+    unit.maxHp = 30;
+    unit.agi = 0;
+    unit.lv = 1;
+    unit.exp = 0;
+    unit.stat = 2;
+
+    unit.hp = 30;
+    unit.mp = 0;
+}
+
 function setUnitSize(unit, wd, hd, speed){
     unit.width = canvas.width*wd;
     unit.height = canvas.height*hd;
@@ -62,6 +131,9 @@ function setPlayerStatus(unit, mode, origin){
     if(mode == 'speed'){
         unit.X_speed = unit.oX_speed + unit.oX_speed * (unit.agi * 0.01);
         unit.Y_speed = unit.oY_speed + unit.oY_speed * (unit.agi * 0.01);
+    }
+    else if(mode == 'health'){
+        unit.hp = origin;
     }
     else{
         if(inventory[origin].id != undefined){
